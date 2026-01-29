@@ -27,7 +27,7 @@ def auth_login_post():
     if user:
         mdp_ok = check_password_hash(user['password'], password)
         if not mdp_ok:
-            flash(u'Vérifier votre mot de passe et essayer encore.', 'alert-warning')
+            flash(u'Vérifier votre mot de passe et essayez encore.', 'alert-warning')
             return redirect('/login')
         else:
             session['login'] = user['login']
@@ -55,6 +55,7 @@ def auth_signup_post():
     password = request.form.get('password')
     tuple_select = (login, email)
     sql = " requete_auth_security_2  "
+
     retour = mycursor.execute(sql, tuple_select)
     user = mycursor.fetchone()
     if user:
@@ -62,7 +63,7 @@ def auth_signup_post():
         return redirect('/signup')
 
     # ajouter un nouveau user
-    password = generate_password_hash(password, method='sha256')
+    password = generate_password_hash(password, method='pbkdf2:sha256')
     tuple_insert = (login, email, password, 'ROLE_client')
     sql = """  requete_auth_security_3  """
     mycursor.execute(sql, tuple_insert)
