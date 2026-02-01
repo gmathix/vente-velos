@@ -21,8 +21,10 @@ def auth_login_post():
     login = request.form.get('login')
     password = request.form.get('password')
     tuple_select = (login)
-    sql = " requete_auth_security_1 "
-    retour = mycursor.execute(sql, (login))
+    sql = (" SELECT * FROM utilisateur "
+           "WHERE login = %s")
+
+    mycursor.execute(sql, tuple_select)
     user = mycursor.fetchone()
     if user:
         mdp_ok = check_password_hash(user['password'], password)
@@ -37,7 +39,7 @@ def auth_login_post():
             if user['role'] == 'ROLE_admin':
                 return redirect('/admin/commande/index')
             else:
-                return redirect('/client/article/show')
+                return redirect('/client/velo/show')
     else:
         flash(u'Vérifier votre login et essayer encore.', 'alert-warning')
         return redirect('/login')
@@ -54,7 +56,10 @@ def auth_signup_post():
     login = request.form.get('login')
     password = request.form.get('password')
     tuple_select = (login, email)
-    sql = " requete_auth_security_2  "
+    sql = """
+    SELECT * FROM utilisateur
+    WHERE login = %s OR email = %s;
+    """
 
     retour = mycursor.execute(sql, tuple_select)
     user = mycursor.fetchone()
@@ -65,10 +70,14 @@ def auth_signup_post():
     # ajouter un nouveau user
     password = generate_password_hash(password, method='pbkdf2:sha256')
     tuple_insert = (login, email, password, 'ROLE_client')
-    sql = """  requete_auth_security_3  """
+    sql = """ 
+    INSERT INTO utilisateur (login, email, password, role) VALUES (%s, %s, %s, %s);
+    """
     mycursor.execute(sql, tuple_insert)
     get_db().commit()
-    sql = """  requete_auth_security_4  """
+    sql = """
+    SELECT LAST_INSERT_ID() AS last_insert_id;
+    """
     mycursor.execute(sql)
     info_last_id = mycursor.fetchone()
     id_user = info_last_id['last_insert_id']
@@ -79,7 +88,7 @@ def auth_signup_post():
     session['login'] = login
     session['role'] = 'ROLE_client'
     session['id_user'] = id_user
-    return redirect('/client/article/show')
+    return redirect('/client/velo/show')
 
 
 @auth_security.route('/logout')

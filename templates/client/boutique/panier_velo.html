@@ -1,0 +1,95 @@
+{#  velos_panier  : tableau de dictionnaires
+        * velos : nom quantite prix velo_id [stock]
+        *
+#}
+
+{% extends "client/layout_client.html" %}
+{% block body %}
+    <div class="container">
+        <div class="row align-self-right">
+        {% include('client/boutique/_panier.html') %}
+            <div class="col">
+              <h3>Les filtres</h3>
+              velos dont le nom est composé par :<br>
+                 {% include('client/boutique/_filtre.html') %}
+            </div>
+        </div>
+
+        <div class="bg-light p-3">
+            <h1>Les velos</h1>
+        </div>
+
+        <div class="row">
+                {% for velo in velos  %}
+                        <div class="card col-4 mt-4 p-1">
+                            <div class="card-body border-dark rounded p-1">
+                                <a href="/client/velo/details?id_velo={{ velo.id_velo }}" >
+                                <h3 class="card-title">
+                                    <span style="color: #0b2e13">{{ velo.nom }}</span><br>
+                                    {{ velo.prix }}
+                                    €
+                                </h3>
+                                     {%  if velo.image is not none %}
+                                        <img class="card-img-top rounded mx-auto d-block"  style="width:100px;height:100px"  src="{{ url_for('static', filename = 'images/')}}{{ velo.image }}"  alt="image  de {{ velo.nom }}" >
+                                    {% else %} <img class="card-img-top rounded mx-auto d-block"   style="width:100px;height:100px"   src="{{ url_for('static', filename='images/no_photo.jpeg')}}"  alt="image  de {{ velo.nom }}" >
+                                    {% endif %}
+                                    <hr>
+                                </a>
+                                <div class="row">
+{# #}                                {% if  velo.stock is defined and velo.stock != None %}
+{# #}                                    {% if velo.stock > 0 %}
+                                        <form  action="/client/panier/add"  method="post" class="col-5">
+                                            <input type="hidden" name="id_velo" value="{{ velo.id_velo }}">
+                                            <div class="input-group">
+                                            <button class="btn  btn-success"  id="button-addon1">
+                                                <i class="fas fa-shopping-cart">Ajouter</i>
+                                            </button>
+                                            <input type="number" id="input-{{ velo.id_velo }}" step="1" min="0" max="{{ velo.stock }}" class="form-control" value="1" name="quantite"  aria-describedby="button-addon1">
+                                            </div>
+                                        </form>
+{# #}                                    {% endif %}
+{# #}                                {% endif %}
+                                     <div class="col-2 align-content-end">
+                                    {% if velo.liste_envie is defined %}
+                                         {%if  velo.liste_envie== 1%}
+                                             <a href="/client/envie/add?id_velo={{ velo.id_velo }}" style="text-decoration: none">💛</a>
+                                         {% else %}
+                                             <a href="/client/envie/add?id_velo={{ velo.id_velo }}" style="text-decoration: none">🤍</a>
+                                         {% endif %}
+                                    {% endif %}
+                                     </div>
+                                </div>
+                            </div>
+                            <div class="card-footer">
+                            {% if velo.stock is defined and velo.stock != None %}
+                                 {% if velo.stock > 0 %}
+                                    <small class="text-muted">Stock restant : {{ velo.stock }}</small>
+                                 {% else %}
+                                    <small class="text-muted">velo  momentanément indisponible</small>
+                                 {% endif %}
+                                {% if velo.nb_declinaison is defined and velo.nb_declinaison != None %}
+                                    ({{ velo.nb_declinaison }} d.)
+                                {% endif %}
+                                <br>
+                            {% endif %}
+                            {% if velo.nb_notes is defined %}
+                                {% if velo.nb_notes > 0 %}
+                                 <a  href="/client/velo/details?id_velo={{ velo.id_velo }}" >
+                                    <span style="color: #3A7734"> note : {{  "{:,.1f}".format(velo.moy_notes) }}({{ velo.nb_notes }})</span>
+                                 </a>
+                                {% endif %}
+                            {% endif %}
+                            {% if velo.nb_avis is defined %}
+                                {% if velo.nb_avis > 0 %}
+                                 <a href="/client/velo/details?id_velo={{ velo.id_velo }}" >
+                                    <span style="color: #3A7734">({{ velo.nb_avis }} avis)</span>
+                                 </a>
+                                {% endif %}
+                            {% endif %}
+                            </div>
+                        </div>
+                {% endfor %}
+        </div>
+    </div>
+{#    {{ velos | pprint }}#}
+{% endblock %}
