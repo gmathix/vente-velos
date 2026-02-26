@@ -138,12 +138,18 @@ def client_panier_vider():
 def client_panier_delete_line():
     mycursor = get_db().cursor()
     id_client = session['id_user']
+    id_velo = request.form.get("id_velo")
     #id_declinaison_velo = request.form.get('id_declinaison_velo')
 
-    sql = ''' selection de ligne du panier '''
+    sql = ''' SELECT * FROM ligne_panier WHERE id_velo = %s AND id_utilisateur = %s'''
+    mycursor.execute(sql, (id_velo, id_client))
+    ligne = mycursor.fetchone()
 
-    sql = ''' suppression de la ligne du panier '''
-    sql2=''' mise à jour du stock de l'velo : stock = stock + qté de la ligne pour l'velo'''
+    sql = ''' DELETE FROM ligne_panier WHERE id_velo = %s AND id_utilisateur = %s '''
+    mycursor.execute(sql, (id_velo, id_client))
+
+    sql2=''' UPDATE velo SET stock = stock + %s WHERE id_velo = %s'''
+    mycursor.execute(sql2, (ligne['quantite'], ligne['id_velo']))
 
     get_db().commit()
     return redirect('/client/velo/show')
