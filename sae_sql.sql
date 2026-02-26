@@ -206,7 +206,7 @@ INSERT INTO ligne_commande (id_velo, id_commande, prix, quantite) VALUES
 (15, 3, 300.00, 1),  -- Modèle 163 route
 
 -- Commande 4 (client - en attente)
-(1, 4, 100.00, 2),   -- Modèle 401 BMX x2
+(1, 4, 100.00, 20),   -- Modèle 401 BMX x2
 (11, 4, 200.00, 1),  -- Modèle 675 enfant
 
 -- Commande 5 (client2 - validé)

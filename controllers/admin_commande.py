@@ -24,7 +24,7 @@ def admin_commande_show():
                 login AS login,
                 date_achat AS date_achat,
                 SUM(quantite) AS nbr_velos,
-                SUM(prix) AS prix_total,
+                SUM(ligne_commande.prix * ligne_commande.quantite) AS prix_total,
                 libelle AS libelle
         FROM commande
         INNER JOIN utilisateur ON commande.utilisateur_id = utilisateur.id_utilisateur
@@ -47,7 +47,6 @@ def admin_commande_show():
                 quantite AS quantite,
                 prix AS prix,
                 (quantite * prix) AS prix_ligne
-                
                     
             FROM ligne_commande
             INNER JOIN commande ON ligne_commande.id_commande = commande.id_commande

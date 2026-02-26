@@ -115,8 +115,6 @@ def client_commande_show():
                      quantite          AS quantite,
                      prix              AS prix,
                      (quantite * prix) AS prix_ligne
-
-
               FROM ligne_commande
                        INNER JOIN commande ON ligne_commande.id_commande = commande.id_commande
                        INNER JOIN utilisateur ON commande.utilisateur_id = utilisateur.id_utilisateur
