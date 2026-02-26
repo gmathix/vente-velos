@@ -107,6 +107,10 @@ def client_panier_delete():
 
     # mise à jour du stock de l'velo disponible
     get_db().commit()
+
+    mycursor.execute("UPDATE velo SET stock = stock + %s WHERE id_velo = %s", (quantite, id_velo))
+    get_db().commit()
+
     return redirect('/client/velo/show')
 
 

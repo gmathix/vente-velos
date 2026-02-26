@@ -80,11 +80,13 @@ def client_velo_show():
 
     # Panier
     mycursor.execute('''
-        SELECT nom_velo AS nom,
+        SELECT velo.id_velo AS id_velo, 
+            nom_velo AS nom,
                quantite AS quantite,
                velo.id_taille AS id_taille,
                libelle_taille AS libelle_taille,
-               prix_velo AS prix
+               prix_velo AS prix,
+                stock AS stock
         FROM ligne_panier
         INNER JOIN velo ON ligne_panier.id_velo = velo.id_velo
         INNER JOIN taille ON velo.id_taille = taille.id_taille
