@@ -1,11 +1,5 @@
-DROP TABLE IF EXISTS ligne_commande;
-DROP TABLE IF EXISTS ligne_panier;
-DROP TABLE IF EXISTS commande;
-DROP TABLE IF EXISTS utilisateur;
-DROP TABLE IF EXISTS velo;
-DROP TABLE IF EXISTS type_velo;
-DROP TABLE IF EXISTS taille;
-DROP TABLE IF EXISTS etat;
+DROP TABLE IF EXISTS ligne_panier, ligne_commande, commande, velo, etat, utilisateur,
+    type_velo, taille;
 
 
 
