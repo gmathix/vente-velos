@@ -2,6 +2,7 @@
 # -*- coding:utf-8 -*-
 from flask import Blueprint
 from flask import request, render_template, redirect, abort, flash, session
+from networkx.algorithms.shortest_paths.weighted import multi_source_dijkstra
 
 from connexion_db import get_db
 
@@ -36,7 +37,46 @@ def client_panier_add():
     #                                , quantite=quantite
     #                                , velo=velo)
 
-# ajout dans le panier d'un velo
+# ajout dans le panier d'un velo]
+
+    sql = "SELECT * FROM ligne_panier WHERE id_velo = %s AND id_utilisateur = %s"
+    mycursor.execute(sql, (id_velo, id_client))
+    article_panier = mycursor.fetchone()
+
+    mycursor.execute("SELECT * FROM velo WHERE id_velo = %s", (id_velo))
+    velo = mycursor.fetchone()
+
+
+
+    if not (article_panier is None) and article_panier['quantite'] >= 1:
+        sql = '''
+        UPDATE ligne_panier SET quantite = quantite + %s
+            WHERE id_utilisateur = %s AND id_velo = %s
+        '''
+        mycursor.execute(sql, (quantite, id_client, id_velo))
+    else:
+        sql = '''
+        INSERT INTO ligne_panier(id_velo, id_utilisateur, quantite, date_ajout) 
+              VALUES(%s, %s, %s, current_timestamp)
+        '''
+        mycursor.execute(sql, (id_velo, id_client, quantite))
+
+
+    if velo['stock'] >= int(quantite):
+        sql = '''
+        UPDATE velo SET stock = stock - %s 
+            WHERE id_velo = %s
+        '''
+        mycursor.execute(sql, (quantite, id_velo))
+    else:
+        flash('Stock insuffisant')
+        sql = '''
+        UPDATE velo SET stock = 0 WHERE id_velo = %s
+        '''
+        mycursor.execute(sql, (id_velo))
+
+
+    get_db().commit()
 
 
     return redirect('/client/velo/show')
@@ -52,13 +92,18 @@ def client_panier_delete():
     # partie 2 : on supprime une déclinaison de l'velo
     # id_declinaison_velo = request.form.get('id_declinaison_velo', None)
 
-    sql = ''' selection de la ligne du panier pour l'velo et l'utilisateur connecté'''
-    velo_panier=[]
+    sql = '''SELECT * FROM ligne_panier WHERE id_utilisateur=%s AND id_velo=%s'''
+    mycursor.execute(sql, (id_client, id_velo))
+    velo_panier=mycursor.fetchone()
+    print(id_client,id_velo,quantite)
 
     if not(velo_panier is None) and velo_panier['quantite'] > 1:
-        sql = ''' mise à jour de la quantité dans le panier => -1 velo '''
+        sql = '''UPDATE ligne_panier SET quantite=quantite-%s 
+              WHERE id_utilisateur = %s AND id_velo = %s'''
+        mycursor.execute(sql, (quantite, id_client, id_velo))
     else:
-        sql = ''' suppression de la ligne de panier'''
+        sql = '''DELETE FROM ligne_panier WHERE id_utilisateur = %s AND id_velo = %s'''
+        mycursor.execute(sql, (id_client, id_velo))
 
     # mise à jour du stock de l'velo disponible
     get_db().commit()

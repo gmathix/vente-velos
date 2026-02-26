@@ -12,11 +12,11 @@
                     {% for item_panier in velos_panier %}
                         <tr>
                             <td>{{item_panier.nom}}
-                            {% if item_panier.id_couleur is defined and item_panier.id_couleur != None and item_panier.id_couleur >1 %}
+                            {% if item_panier.id_couleur is defined and item_panier.id_couleur != None and item_panier.id_couleur >= 1 %}
                                 <small style="color: #6dcea2">({{ item_panier.libelle_couleur }})</small>
                             {% endif %}
-                            {% if item_panier.id_taille is defined and item_panier.id_taille != None and item_panier.id_taille >1 %}
-                                <small style="color: #d941c2">({{ item_panier.libelle_taille }})</small>
+                            {% if item_panier.id_taille is defined and item_panier.id_taille != None and item_panier.id_taille >= 1 %}
+                                <p style="color: #d941c2">({{ item_panier.libelle_taille }})</p>
                             {% endif %}
                             </td>
                             <td>{{item_panier.quantite}}</td>

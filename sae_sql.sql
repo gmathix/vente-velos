@@ -143,37 +143,37 @@ INSERT INTO etat (libelle) VALUES
 -- ============================================
 INSERT INTO velo (nom_velo, prix_velo, matiere, description, fournisseur, marque, photo, stock, id_taille, id_type_velo) VALUES
 -- BMX (1 vélo)
-('Modèle 401', 100.00, 'Aluminium', 'BMX orange 20 pouces, 1 vitesse, freins patins', 'Fournisseur BMX', 'BikeShop', 'BMX1.png', 8, 6, 1),
+('BMX Orange', 100.00, 'Aluminium', 'BMX orange 20 pouces, 1 vitesse, freins patins', 'Fournisseur BMX', 'BikeShop', 'BMX1.png', 8, 6, 1),
 
 -- Ville (7 vélos)
-('Modèle 185', 500.00, 'Acier', 'Vélo ville noir 26", 7 vitesses, éclairage dynamo, panier et porte-bagage', 'Urban Bikes', 'CityCycle', 'ville1.jpg', 12, 3, 2),
-('Modèle 426', 300.00, 'Acier', 'Vélo ville jaune 24", 3 vitesses, garde-boue, panier et porte-bagage', 'Urban Bikes', 'CityCycle', 'ville2.jpg', 10, 2, 2),
-('Modèle 615', 450.00, 'Acier', 'Vélo ville noir 26", 3 vitesses, freins disques, éclairage dynamo', 'Urban Bikes', 'VilleConfort', 'ville3.jpg', 7, 3, 2),
-('Modèle 121', 450.00, 'Acier', 'Vélo ville rose 26", 3 vitesses, freins disques, dynamo, accessoires complets', 'Urban Bikes', 'CityCycle', 'ville4.jpeg', 9, 3, 2),
-('Modèle 377', 350.00, 'Acier', 'Vélo ville orange 26", 3 vitesses, éclairage dynamo, porte-bagage', 'Urban Bikes', 'VilleConfort', 'ville5.jpg', 11, 3, 2),
-('Modèle 115', 350.00, 'Aluminium', 'Vélo ville bleu 28", 3 vitesses, éclairage dynamo, porte-bagage', 'Urban Bikes', 'AluminiumPro', 'ville6.jpg', 8, 4, 2),
-('Modèle 435', 300.00, 'Acier', 'Vélo ville blanc 24", 3 vitesses, freins disques, équipement complet', 'Urban Bikes', 'CityCycle', 'ville7.jpg', 6, 2, 2),
+('Velo ville noir', 500.00, 'Acier', 'Vélo ville noir 26", 7 vitesses, éclairage dynamo, panier et porte-bagage', 'Urban Bikes', 'CityCycle', 'ville1.jpg', 12, 3, 2),
+('Velo ville jaune', 300.00, 'Acier', 'Vélo ville jaune 24", 3 vitesses, garde-boue, panier et porte-bagage', 'Urban Bikes', 'CityCycle', 'ville2.jpg', 10, 2, 2),
+('Velo ville noir', 450.00, 'Acier', 'Vélo ville noir 26", 3 vitesses, freins disques, éclairage dynamo', 'Urban Bikes', 'VilleConfort', 'ville3.jpg', 7, 3, 2),
+('Velo ville rose', 450.00, 'Acier', 'Vélo ville rose 26", 3 vitesses, freins disques, dynamo, accessoires complets', 'Urban Bikes', 'CityCycle', 'ville4.jpeg', 9, 3, 2),
+('Velo ville orange', 350.00, 'Acier', 'Vélo ville orange 26", 3 vitesses, éclairage dynamo, porte-bagage', 'Urban Bikes', 'VilleConfort', 'ville5.jpg', 11, 3, 2),
+('Velo ville bleu', 350.00, 'Aluminium', 'Vélo ville bleu 28", 3 vitesses, éclairage dynamo, porte-bagage', 'Urban Bikes', 'AluminiumPro', 'ville6.jpg', 8, 4, 2),
+('Velo ville blanc', 300.00, 'Acier', 'Vélo ville blanc 24", 3 vitesses, freins disques, équipement complet', 'Urban Bikes', 'CityCycle', 'ville7.jpg', 6, 2, 2),
 
 -- VTT (4 vélos)
-('Modèle 686', 450.00, 'Aluminium', 'VTT orange 26", 21 vitesses, freins disques', 'Mountain Gear', 'TrailPro', 'vtt1.jpeg', 5, 3, 3),
-('Modèle 490', 750.00, 'Aluminium', 'VTT noir 28", 27 vitesses, freins disques, éclairage piles, garde-boue', 'Mountain Gear', 'AlpineSport', 'vtt2.jpeg', 4, 4, 3),
-('Modèle 265', 600.00, 'Aluminium', 'VTT noir 26", 27 vitesses, freins patins', 'Mountain Gear', 'TrailPro', 'vtt3.jpeg', 6, 3, 3),
-('Modèle 558', 800.00, 'Acier', 'VTT orange 28", 30 vitesses, freins disques haute performance', 'Mountain Gear', 'ProSport', 'vtt4.jpeg', 3, 4, 3),
+('VTT orange', 450.00, 'Aluminium', 'VTT orange 26", 21 vitesses, freins disques', 'Mountain Gear', 'TrailPro', 'vtt1.jpeg', 5, 3, 3),
+('VTT noir', 750.00, 'Aluminium', 'VTT noir 28", 27 vitesses, freins disques, éclairage piles, garde-boue', 'Mountain Gear', 'AlpineSport', 'vtt2.jpeg', 4, 4, 3),
+('VTT noir', 600.00, 'Aluminium', 'VTT noir 26", 27 vitesses, freins patins', 'Mountain Gear', 'TrailPro', 'vtt3.jpeg', 6, 3, 3),
+('VTT orange', 800.00, 'Acier', 'VTT orange 28", 30 vitesses, freins disques haute performance', 'Mountain Gear', 'ProSport', 'vtt4.jpeg', 3, 4, 3),
 
 -- Enfant (2 vélos)
-('Modèle 675', 200.00, 'Acier', 'Vélo enfant noir 16", 5 vitesses, garde-boue', 'Kids Bikes', 'Junior', 'enfant1.jpeg', 15, 1, 4),
-('Modèle 380', 300.00, 'Acier', 'Vélo enfant bleu 20", 5 vitesses, éclairage dynamo, garde-boue, panier', 'Kids Bikes', 'Junior', 'enfant2.jpeg', 12, 1, 4),
+('Velo enfant noir', 200.00, 'Acier', 'Vélo enfant noir 16", 5 vitesses, garde-boue', 'Kids Bikes', 'Junior', 'enfant1.jpeg', 15, 1, 4),
+('Velo enfant bleu', 300.00, 'Acier', 'Vélo enfant bleu 20", 5 vitesses, éclairage dynamo, garde-boue, panier', 'Kids Bikes', 'Junior', 'enfant2.jpeg', 12, 1, 4),
 
 -- Pliant (1 vélo)
-('Modèle 363', 1000.00, 'Acier', 'Vélo pliant bleu 16", 6 vitesses, éclairage piles, compact et pratique', 'Compact Wheels', 'FoldMaster', 'pliant1.jpeg', 5, 6, 5),
+('Velo pliant', 1000.00, 'Acier', 'Vélo pliant bleu 16", 6 vitesses, éclairage piles, compact et pratique', 'Compact Wheels', 'FoldMaster', 'pliant1.jpeg', 5, 6, 5),
 
 -- VTC (1 vélo)
-('Modèle 331', 400.00, 'Acier', 'VTC bleu 28", 15 vitesses, éclairage dynamo, garde-boue, porte-bagage', 'Hybrid Cycles', 'Polyvalent', 'vtc1.jpeg', 7, 4, 6),
+('VTC bleu', 400.00, 'Acier', 'VTC bleu 28", 15 vitesses, éclairage dynamo, garde-boue, porte-bagage', 'Hybrid Cycles', 'Polyvalent', 'vtc1.jpeg', 7, 4, 6),
 
 -- Route (3 vélos)
-('Modèle 163', 300.00, 'Acier', 'Vélo route bleu 28", 10 vitesses, freins patins', 'Speed Bikes', 'RacePro', 'route1.jpeg', 6, 4, 7),
-('Modèle 379', 250.00, 'Acier', 'Vélo route marron 28", 10 vitesses, freins patins', 'Speed Bikes', 'ClassicRoad', 'route2.jpeg', 8, 4, 7),
-('Modèle 184', 400.00, 'Acier', 'Vélo route rouge 28", 15 vitesses, freins patins, performance', 'Speed Bikes', 'RacePro', 'route3.jpeg', 5, 4, 7);
+('Velo route bleu', 300.00, 'Acier', 'Vélo route bleu 28", 10 vitesses, freins patins', 'Speed Bikes', 'RacePro', 'route1.jpeg', 6, 4, 7),
+('Velo route marron', 250.00, 'Acier', 'Vélo route marron 28", 10 vitesses, freins patins', 'Speed Bikes', 'ClassicRoad', 'route2.jpeg', 8, 4, 7),
+('Velo route rouge', 400.00, 'Acier', 'Vélo route rouge 28", 15 vitesses, freins patins, performance', 'Speed Bikes', 'RacePro', 'route3.jpeg', 5, 4, 7);
 
 -- ============================================
 -- TABLE: commande
@@ -233,45 +233,3 @@ INSERT INTO ligne_panier (id_velo, id_utilisateur, quantite, date_ajout) VALUES
 (3, 3, 1, '2025-01-29'),   -- Modèle 426 ville
 (7, 3, 2, '2025-01-29'),   -- Modèle 435 ville x2
 (11, 3, 1, '2025-01-28');  -- Modèle 265 VTT
-
--- ============================================
--- VÉRIFICATION DES DONNÉES INSÉRÉES
--- ============================================
-SELECT 'TAILLES' as Table_Name, COUNT(*) as Nb_Lignes FROM taille
-UNION ALL
-SELECT 'TYPES VELO', COUNT(*) FROM type_velo
-UNION ALL
-SELECT 'UTILISATEURS', COUNT(*) FROM utilisateur
-UNION ALL
-SELECT 'ETATS', COUNT(*) FROM etat
-UNION ALL
-SELECT 'VELOS', COUNT(*) FROM velo
-UNION ALL
-SELECT 'COMMANDES', COUNT(*) FROM commande
-UNION ALL
-SELECT 'LIGNES COMMANDE', COUNT(*) FROM ligne_commande
-UNION ALL
-SELECT 'LIGNES PANIER', COUNT(*) FROM ligne_panier;
-
--- ============================================
--- REQUÊTES DE VÉRIFICATION DÉTAILLÉES
--- ============================================
-
--- Répartition des vélos par type
-SELECT t.libelle_type_velo, COUNT(*) as nb_velos
-FROM velo v
-JOIN type_velo t ON v.id_type_velo = t.id_type_velo
-GROUP BY t.libelle_type_velo
-ORDER BY nb_velos DESC;
-
--- Commandes par état
-SELECT e.libelle, COUNT(*) as nb_commandes
-FROM commande c
-JOIN etat e ON c.id_etat = e.id_etat
-GROUP BY e.libelle;
-
--- velos dans les paniers
-SELECT u.login, COUNT(*) as velos_panier
-FROM ligne_panier lp
-JOIN utilisateur u ON lp.id_utilisateur = u.id_utilisateur
-GROUP BY u.login;
