@@ -12,15 +12,9 @@ fixtures_load = Blueprint('fixtures_load', __name__,
 def fct_fixtures_load():
     mycursor = get_db().cursor()
     sql='''
-    DROP TABLE IF EXISTS 
-        ligne_commande, 
-        ligne_panier,
-        commande,
-        utilisateur, 
-        velo, 
-        type_velo, 
-        taille, 
-        etat;
+    DROP TABLE IF EXISTS ligne_panier, ligne_commande, commande, velo, adresse, etat, utilisateur,
+    type_velo, taille;
+
     '''
 
     mycursor.execute(sql)
@@ -109,6 +103,27 @@ def fct_fixtures_load():
      '''
     mycursor.execute(sql)
 
+    sql = '''
+    CREATE TABLE adresse(
+   id_adresse INT AUTO_INCREMENT,
+   nom VARCHAR(50),
+   rue VARCHAR(50),
+   code_postal INT,
+   ville VARCHAR(50),
+   date_utilisation DATE,
+   id_utilisateur INT NOT NULL,
+   PRIMARY KEY(id_adresse),
+   FOREIGN KEY(id_utilisateur) REFERENCES utilisateur(id_utilisateur));
+          '''
+    mycursor.execute(sql)
+
+    sql = '''
+    INSERT INTO adresse (nom, rue, code_postal, ville, date_utilisation, id_utilisateur) VALUES
+ ('Belfort', 'rue des raverottes', 80000, 'belfort', '2025-12-12', 2),
+  ('Belfort', 'rue des belfortains', 80000, 'belfort', '2025-02-12', 2);
+'''
+    mycursor.execute(sql)
+
     sql = ''' 
     CREATE TABLE velo(
     id_velo INT AUTO_INCREMENT,
@@ -171,28 +186,32 @@ def fct_fixtures_load():
 
     sql = ''' 
     CREATE TABLE commande(
-    id_commande INT AUTO_INCREMENT,
-    date_achat DATE,
-    utilisateur_id INT,
-    etat_id INT,
-    id_etat INT NOT NULL,
-    PRIMARY KEY(id_commande),
-    FOREIGN KEY(id_etat) REFERENCES etat(id_etat)
-    ) DEFAULT CHARSET=utf8;  
+   id_commande INT AUTO_INCREMENT,
+   date_achat DATE,
+   utilisateur_id INT,
+   id_adresse_livraison INT NOT NULL,
+   id_adresse_facture INT NOT NULL,
+   id_etat INT NOT NULL,
+   PRIMARY KEY(id_commande),
+   FOREIGN KEY(id_adresse_livraison) REFERENCES adresse(id_adresse),
+   FOREIGN KEY(id_adresse_facture) REFERENCES adresse(id_adresse),
+   FOREIGN KEY(id_etat) REFERENCES etat(id_etat)
+);
      '''
     mycursor.execute(sql)
     sql = ''' 
-    INSERT INTO commande (date_achat, utilisateur_id, etat_id, id_etat) VALUES
-    -- Commandes client (id=2)
-    ('2024-12-10', 2, 3, 3),  -- validé
-    ('2025-01-05', 2, 2, 2),  -- expédié
-    ('2025-01-22', 2, 4, 4),  -- confirmé
-    ('2025-01-28', 2, 1, 1),  -- en attente
-    
-    -- Commandes client2 (id=3)
-    ('2024-11-15', 3, 3, 3),  -- validé
-    ('2025-01-08', 3, 2, 2),  -- expédié
-    ('2025-01-25', 3, 1, 1);  -- en attente
+    INSERT INTO commande (date_achat, utilisateur_id, id_adresse_livraison, id_adresse_facture, id_etat)VALUES
+-- Commandes client (id=2)
+('2024-12-10', 2, 1, 1,3),  -- validé
+('2025-01-05', 2, 1, 1, 2),  -- expédié
+('2025-01-22', 2, 1, 1, 4),  -- confirmé
+('2025-01-28', 2, 1, 1, 1),  -- en attente
+
+-- Commandes client2 (id=3)
+('2024-11-15', 3, 2, 2, 3),  -- validé
+('2025-01-08', 3, 2, 2, 2),  -- expédié
+('2025-01-25', 3, 2, 2, 1);  -- en attente
+
                  '''
     mycursor.execute(sql)
 

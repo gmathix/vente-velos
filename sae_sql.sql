@@ -1,4 +1,4 @@
-DROP TABLE IF EXISTS ligne_panier, ligne_commande, commande, velo, etat, utilisateur,
+DROP TABLE IF EXISTS ligne_panier, ligne_commande, commande, velo, adresse, etat, utilisateur,
     type_velo, taille;
 
 
@@ -19,8 +19,8 @@ CREATE TABLE utilisateur(
    id_utilisateur INT AUTO_INCREMENT,
    login VARCHAR(50),
    password VARCHAR(200),
-   role VARCHAR(50),
    est_actif BOOLEAN,
+   role VARCHAR(50),
    nom VARCHAR(50),
    email VARCHAR(50),
    PRIMARY KEY(id_utilisateur)
@@ -32,6 +32,18 @@ CREATE TABLE etat(
    PRIMARY KEY(id_etat)
 );
 
+CREATE TABLE adresse(
+   id_adresse INT AUTO_INCREMENT,
+   nom VARCHAR(50),
+   rue VARCHAR(50),
+   code_postal INT,
+   ville VARCHAR(50),
+   date_utilisation DATE,
+   id_utilisateur INT NOT NULL,
+   PRIMARY KEY(id_adresse),
+   FOREIGN KEY(id_utilisateur) REFERENCES utilisateur(id_utilisateur)
+);
+
 CREATE TABLE velo(
    id_velo INT AUTO_INCREMENT,
    nom_velo VARCHAR(50),
@@ -41,8 +53,8 @@ CREATE TABLE velo(
    matiere VARCHAR(50),
    description VARCHAR(100),
    fournisseur VARCHAR(50),
-   marque VARCHAR(50),
    photo VARCHAR(50),
+   marque VARCHAR(50),
    stock INT,
    id_taille INT NOT NULL,
    id_type_velo INT NOT NULL,
@@ -55,9 +67,12 @@ CREATE TABLE commande(
    id_commande INT AUTO_INCREMENT,
    date_achat DATE,
    utilisateur_id INT,
-   etat_id INT,
+   id_adresse_livraison INT NOT NULL,
+   id_adresse_facture INT NOT NULL,
    id_etat INT NOT NULL,
    PRIMARY KEY(id_commande),
+   FOREIGN KEY(id_adresse_livraison) REFERENCES adresse(id_adresse),
+   FOREIGN KEY(id_adresse_facture) REFERENCES adresse(id_adresse),
    FOREIGN KEY(id_etat) REFERENCES etat(id_etat)
 );
 
@@ -80,6 +95,7 @@ CREATE TABLE ligne_panier(
    FOREIGN KEY(id_velo) REFERENCES velo(id_velo),
    FOREIGN KEY(id_utilisateur) REFERENCES utilisateur(id_utilisateur)
 );
+
 
 
 -- ============================================
@@ -132,6 +148,9 @@ INSERT INTO etat (libelle) VALUES
 ('validé'),
 ('confirmé');
 
+INSERT INTO adresse (nom, rue, code_postal, ville, date_utilisation, id_utilisateur) VALUES
+ ('Belfort', 'rue des raverottes', 80000, 'belfort', '2025-12-12', 2),
+  ('Belfort', 'rue des belfortains', 80000, 'belfort', '2025-02-12', 2);
 -- ============================================
 -- TABLE: velo (18 vélos du CSV)
 -- ============================================
@@ -172,17 +191,17 @@ INSERT INTO velo (nom_velo, prix_velo, matiere, description, fournisseur, marque
 -- ============================================
 -- TABLE: commande
 -- ============================================
-INSERT INTO commande (date_achat, utilisateur_id, etat_id, id_etat) VALUES
+INSERT INTO commande (date_achat, utilisateur_id, commande.id_adresse_livraison, id_adresse_facture, id_etat)VALUES
 -- Commandes client (id=2)
-('2024-12-10', 2, 3, 3),  -- validé
-('2025-01-05', 2, 2, 2),  -- expédié
-('2025-01-22', 2, 4, 4),  -- confirmé
-('2025-01-28', 2, 1, 1),  -- en attente
+('2024-12-10', 2, 1, 1,3),  -- validé
+('2025-01-05', 2, 1, 1, 2),  -- expédié
+('2025-01-22', 2, 1, 1, 4),  -- confirmé
+('2025-01-28', 2, 1, 1, 1),  -- en attente
 
 -- Commandes client2 (id=3)
-('2024-11-15', 3, 3, 3),  -- validé
-('2025-01-08', 3, 2, 2),  -- expédié
-('2025-01-25', 3, 1, 1);  -- en attente
+('2024-11-15', 3, 2, 2, 3),  -- validé
+('2025-01-08', 3, 2, 2, 2),  -- expédié
+('2025-01-25', 3, 2, 2, 1);  -- en attente
 
 -- ============================================
 -- TABLE: ligne_commande
