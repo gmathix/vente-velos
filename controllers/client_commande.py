@@ -88,11 +88,20 @@ def client_commande_add():
 def client_commande_show():
     mycursor = get_db().cursor()
     id_client = session['id_user']
-    sql = '''  selection des commandes ordonnées par état puis par date d'achat descendant 
-    SELECT id_commande, date_commande, etat
-    FROM commande
-    WHERE id_commande = %s
-    ORDER BY date_commande DESC'''
+    sql = '''
+          SELECT 
+              commande.id_commande, 
+              date_achat,
+              libelle, 
+              SUM(ligne_commande.quantite) AS nbr_velos,
+              SUM(ligne_commande.prix * ligne_commande.quantite) AS prix_total
+        FROM commande
+        INNER JOIN etat ON commande.id_etat = etat.id_etat
+        INNER JOIN ligne_commande ON commande.id_commande = ligne_commande.id_commande
+        WHERE commande.utilisateur_id = %s
+      GROUP BY commande.id_commande, date_achat, libelle
+        ORDER BY commande.date_achat DESC
+          '''
     mycursor.execute(sql, id_client)
     commandes = mycursor.fetchall()
 
@@ -101,7 +110,20 @@ def client_commande_show():
     id_commande = request.args.get('id_commande', None)
     if id_commande != None:
         print(id_commande)
-        sql = ''' selection du détails d'une commande '''
+        sql = '''
+              SELECT utilisateur.nom   AS nom,
+                     quantite          AS quantite,
+                     prix              AS prix,
+                     (quantite * prix) AS prix_ligne
+
+
+              FROM ligne_commande
+                       INNER JOIN commande ON ligne_commande.id_commande = commande.id_commande
+                       INNER JOIN utilisateur ON commande.utilisateur_id = utilisateur.id_utilisateur
+              WHERE ligne_commande.id_commande = %s \
+              '''
+        mycursor.execute(sql, id_commande)
+        velos_commande = mycursor.fetchall()
 
         # partie 2 : selection de l'adresse de livraison et de facturation de la commande selectionnée
         sql = ''' selection des adressses '''
