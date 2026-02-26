@@ -34,14 +34,17 @@ def activate_db_options(db):
             db.commit()
         else:
             print('MYSQL : mode ONLY_FULL_GROUP_BY  ok')   # mettre en commentaire
-    # Vérifier et activer l'option lower_case_table_names si nécessaire
-    cursor.execute("SHOW VARIABLES LIKE 'lower_case_table_names'")
+
+def activate_db_options(db):
+    cursor = db.cursor()
+
+    cursor.execute("SHOW VARIABLES LIKE 'sql_mode'")
     result = cursor.fetchone()
+
     if result:
-        if result['Value'] != '0':
-            print('MYSQL : valeur de la variable globale lower_case_table_names differente de 0')   # mettre en commentaire
-            cursor.execute("SET GLOBAL lower_case_table_names = 0")
+        modes = result['Value'].split(',')
+        if 'ONLY_FULL_GROUP_BY' not in modes:
+            cursor.execute("SET sql_mode=(SELECT CONCAT(@@sql_mode, ',ONLY_FULL_GROUP_BY'))")
             db.commit()
-        else :
-            print('MYSQL : variable globale lower_case_table_names=0  ok')    # mettre en commentaire
+
     cursor.close()
