@@ -17,10 +17,18 @@ admin_velo = Blueprint('admin_velo', __name__,
 @admin_velo.route('/admin/velo/show')
 def show_velo():
     mycursor = get_db().cursor()
-    sql = '''  requête admin_velo_1
-    '''
+    sql = ''' 
+     SELECT nom_velo AS nom,
+         id_velo AS id_velo,
+         id_type_velo AS type_velo_id,
+         prix_velo AS prix,
+         stock AS stock,
+         photo AS image
+     FROM velo
+          '''
     mycursor.execute(sql)
     velos = mycursor.fetchall()
+    print(velos)
     return render_template('admin/velo/show_velo.html', velos=velos)
 
 
@@ -52,8 +60,6 @@ def valid_add_velo():
         print("erreur")
         filename=None
 
-    sql = '''  requête admin_velo_2 '''
-
     tuple_add = (nom, filename, prix, type_velo_id, description)
     print(tuple_add)
     mycursor.execute(sql, tuple_add)
@@ -78,7 +84,6 @@ def delete_velo():
         message= u'il y a des declinaisons dans cet velo : vous ne pouvez pas le supprimer'
         flash(message, 'alert-warning')
     else:
-        sql = ''' requête admin_velo_4 '''
         mycursor.execute(sql, id_velo)
         velo = mycursor.fetchone()
         print(velo)
@@ -102,13 +107,24 @@ def edit_velo():
     id_velo=request.args.get('id_velo')
     mycursor = get_db().cursor()
     sql = '''
-    requête admin_velo_6    
+        SELECT  nom_velo AS nom,
+         id_velo AS id_velo,
+         id_type_velo AS type_velo_id,
+         prix_velo AS prix,
+         stock AS stock,
+         photo AS image,
+            description AS description
+        FROM velo
+        WHERE id_velo = %s
     '''
+
     mycursor.execute(sql, id_velo)
     velo = mycursor.fetchone()
     print(velo)
     sql = '''
-    requête admin_velo_7
+    SELECT id_type_velo,
+          libelle_type_velo AS libelle
+    FROM type_velo
     '''
     mycursor.execute(sql)
     types_velo = mycursor.fetchall()

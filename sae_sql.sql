@@ -143,7 +143,7 @@ INSERT INTO etat (libelle) VALUES
 -- ============================================
 INSERT INTO velo (nom_velo, prix_velo, matiere, description, fournisseur, marque, photo, stock, id_taille, id_type_velo) VALUES
 -- BMX (1 vélo)
-('BMX Orange', 100.00, 'Aluminium', 'BMX orange 20 pouces, 1 vitesse, freins patins', 'Fournisseur BMX', 'BikeShop', 'BMX1.png', 8, 6, 1),
+('BMX Orange', 100.00, 'Aluminium', 'BMX orange 20 pouces, 1 vitesse, freins patins', 'Fournisseur BMX', 'BikeShop', 'BMX1.jpg', 8, 6, 1),
 
 -- Ville (7 vélos)
 ('Velo ville noir', 500.00, 'Acier', 'Vélo ville noir 26", 7 vitesses, éclairage dynamo, panier et porte-bagage', 'Urban Bikes', 'CityCycle', 'ville1.jpg', 12, 3, 2),
