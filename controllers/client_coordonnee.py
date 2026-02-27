@@ -1,5 +1,7 @@
 #! /usr/bin/python
 # -*- coding:utf-8 -*-
+from idlelib.idle import idlelib_dir
+
 from flask import Blueprint
 from flask import Flask, request, render_template, redirect, url_for, abort, flash, session, g
 
@@ -18,10 +20,26 @@ def client_coordonnee_show():
     mycursor.execute(sql, id_client)
     utilisateur = mycursor.fetchone()
 
+    sql = '''
+        SELECT adresse.nom,
+                rue,
+                code_postal,
+                ville,
+                COUNT(id_commande) AS nbr_commandes
+        FROM adresse
+        INNER JOIN utilisateur ON adresse.id_utilisateur = utilisateur.id_utilisateur
+        RIGHT JOIN commande ON adresse.id_adresse = commande.id_adresse_livraison
+        WHERE utilisateur.id_utilisateur = %s
+        GROUP BY adresse.nom, rue, code_postal, ville 
+    '''
+    mycursor.execute(sql, id_client)
+    adresses = mycursor.fetchall()
+    nb_adresses = len(adresses)
+
     return render_template('client/coordonnee/show_coordonnee.html'
                            , utilisateur=utilisateur
-                         #  , adresses=adresses
-                         #  , nb_adresses=nb_adresses
+                           , adresses=adresses
+                           , nb_adresses=nb_adresses
                            )
 
 @client_coordonnee.route('/client/coordonnee/edit', methods=['GET'])
@@ -29,8 +47,12 @@ def client_coordonnee_edit():
     mycursor = get_db().cursor()
     id_client = session['id_user']
 
+    sql = ''' SELECT * FROM utilisateur WHERE id_utilisateur = %s'''
+    mycursor.execute(sql, id_client)
+    utilisateur = mycursor.fetchone()
+
     return render_template('client/coordonnee/edit_coordonnee.html'
-                           #,utilisateur=utilisateur
+                           ,utilisateur=utilisateur
                            )
 
 @client_coordonnee.route('/client/coordonnee/edit', methods=['POST'])
@@ -41,12 +63,22 @@ def client_coordonnee_edit_valide():
     login = request.form.get('login')
     email = request.form.get('email')
 
-    utilisateur = None
+    sql = ''' SELECT * \
+              FROM utilisateur \
+              WHERE id_utilisateur = %s'''
+    mycursor.execute(sql, id_client)
+    user = mycursor.fetchone()
+
+    sql = ''' SELECT * FROM utilisateur WHERE login = %s OR email = %s'''
+    mycursor.execute(sql, (login, email))
+    utilisateur = mycursor.fetchall()
+
     if utilisateur:
         flash(u'votre cet Email ou ce Login existe déjà pour un autre utilisateur', 'alert-warning')
         return render_template('client/coordonnee/edit_coordonnee.html'
-                               #, user=user
+                               , user=user
                                )
+
 
 
     get_db().commit()
