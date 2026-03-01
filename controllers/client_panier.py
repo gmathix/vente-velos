@@ -1,8 +1,8 @@
-#! /usr/bin/python
+
 # -*- coding:utf-8 -*-
 from flask import Blueprint
 from flask import request, render_template, redirect, abort, flash, session
-from networkx.algorithms.shortest_paths.weighted import multi_source_dijkstra
+
 
 from connexion_db import get_db
 
@@ -55,11 +55,12 @@ def client_panier_add():
         '''
         mycursor.execute(sql, (quantite, id_client, id_velo))
     else:
-        sql = '''
-        INSERT INTO ligne_panier(id_velo, id_utilisateur, quantite, date_ajout) 
-              VALUES(%s, %s, %s, current_timestamp)
-        '''
-        mycursor.execute(sql, (id_velo, id_client, quantite))
+        if int(quantite) >= 1:
+            sql = '''
+            INSERT INTO ligne_panier(id_velo, id_utilisateur, quantite, date_ajout) 
+                  VALUES(%s, %s, %s, current_timestamp)
+            '''
+            mycursor.execute(sql, (id_velo, id_client, quantite))
 
 
     if velo['stock'] >= int(quantite):

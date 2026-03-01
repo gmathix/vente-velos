@@ -1,23 +1,14 @@
-{#
-velos (tableau de dictionnaires)
-* tableau de "velo"
-    * id_velo, nom, type_velo_id, prix
-    * option :
-        * stock ,
-        * nb_avis ,
-        * nb_declinaisons
-#}
 {% extends 'admin/layout_admin.html' %}
 
 {% block title %}
-    <title>afficher les velos</title>
+    <title>supprimer les velos</title>
 {% endblock %}
 
 {% block body %}
-<h3>velo</h3>
-<a  class="btn btn-outline-success" href="/admin/velo/add">ajouter un velo</a>
-<br><br>
-{#{{ velos }}#}
+<h3>Impossible de supprimer le type de velo : {{ velos | length }} velos présents</h3>
+<br>
+
+
 <table class="table">
     <thead class="thead-dark">
         <tr>
@@ -79,9 +70,7 @@ velos (tableau de dictionnaires)
                         {% endif %}
                   </td>
                   <td>
-                      <a  class="btn btn-outline-danger" href="/admin/velo/delete?id_velo={{ ligne.id_velo }}" onclick="return confirm('Are you sure?')" >supprimer</a>
-                      <a  class="btn btn-outline-warning" href="/admin/velo/edit?id_velo={{ ligne.id_velo }}">editer</a>
-                      <a  class="btn btn-outline-warning" href="/admin/velo/commentaires?id_velo={{ ligne.id_velo }}">commentaires</a>
+                      <a  class="btn btn-outline-danger" href="/admin/velo/delete-cascade?id_type_velo={{ ligne.type_velo_id }}&id_velo={{ ligne.id_velo }}" onclick="return confirm('Are you sure?')" >supprimer</a>
                   </td>
            </tr>
         {% endfor %}
@@ -94,4 +83,7 @@ velos (tableau de dictionnaires)
     {% endif %}
     </tbody>
 </table>
+
+<a class="btn btn-warning" href="/admin/type-velo/show">Annuler</a>&nbsp;
+
 {% endblock %}

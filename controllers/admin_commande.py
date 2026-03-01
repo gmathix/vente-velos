@@ -1,4 +1,3 @@
-#! /usr/bin/python
 # -*- coding:utf-8 -*-
 from flask import Blueprint
 from flask import Flask, request, render_template, redirect, flash, session
@@ -70,7 +69,10 @@ def admin_commande_valider():
     commande_id = request.form.get('id_commande', None)
     if commande_id != None:
         print(commande_id)
-        sql = '''           '''
+        sql = ''' 
+              UPDATE commande SET id_etat = (SELECT etat.id_etat from etat WHERE libelle = 'validé')
+              WHERE id_commande = %s
+          '''
         mycursor.execute(sql, commande_id)
         get_db().commit()
     return redirect('/admin/commande/show')

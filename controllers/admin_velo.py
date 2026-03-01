@@ -1,7 +1,8 @@
-#! /usr/bin/python
+
 # -*- coding:utf-8 -*-
 import math
 import os.path
+import math
 from random import random
 
 from flask import Blueprint
@@ -28,7 +29,7 @@ def show_velo():
           '''
     mycursor.execute(sql)
     velos = mycursor.fetchall()
-    print(velos)
+
     return render_template('admin/velo/show_velo.html', velos=velos)
 
 
@@ -36,8 +37,16 @@ def show_velo():
 def add_velo():
     mycursor = get_db().cursor()
 
-    return render_template('admin/velo/add_velo.html'
-                           #,types_velo=type_velo,
+    sql = '''
+          SELECT id_type_velo      AS id_type_velo,
+                 libelle_type_velo AS libelle
+          FROM type_velo \
+          '''
+    mycursor.execute(sql)
+    types_velo = mycursor.fetchall()
+
+    return render_template('admin/velo/add_velo.html',
+                            types_velo=types_velo,
                            #,couleurs=colors
                            #,tailles=tailles
                             )
@@ -51,7 +60,9 @@ def valid_add_velo():
     type_velo_id = request.form.get('type_velo_id', '')
     prix = request.form.get('prix', '')
     description = request.form.get('description', '')
+    stock = request.form.get('stock', '')
     image = request.files.get('image', '')
+
 
     if image:
         filename = 'img_upload'+ str(int(2147483647 * random())) + '.png'
@@ -60,8 +71,12 @@ def valid_add_velo():
         print("erreur")
         filename=None
 
-    tuple_add = (nom, filename, prix, type_velo_id, description)
-    print(tuple_add)
+    tuple_add = (None, nom,  prix, description, filename, stock, 1, type_velo_id)
+
+    sql = '''
+    INSERT INTO velo (id_velo, nom_velo, prix_velo, description, photo, stock, id_taille, id_type_velo) VALUES
+          (%s, %s, %s, %s, %s, %s, %s, %s)'''
+
     mycursor.execute(sql, tuple_add)
     get_db().commit()
 
@@ -77,19 +92,28 @@ def valid_add_velo():
 def delete_velo():
     id_velo=request.args.get('id_velo')
     mycursor = get_db().cursor()
-    sql = ''' requête admin_velo_3 '''
+    sql = '''SELECT
+                 0 AS nb_declinaison,
+                '' AS image
+             FROM velo WHERE id_velo = %s'''
     mycursor.execute(sql, id_velo)
     nb_declinaison = mycursor.fetchone()
-    if nb_declinaison['nb_declinaison'] > 0:
+    if nb_declinaison and nb_declinaison['nb_declinaison'] > 0:
         message= u'il y a des declinaisons dans cet velo : vous ne pouvez pas le supprimer'
         flash(message, 'alert-warning')
     else:
+        sql = ''' SELECT photo AS image FROM velo WHERE id_velo = %s'''
         mycursor.execute(sql, id_velo)
         velo = mycursor.fetchone()
-        print(velo)
         image = velo['image']
 
-        sql = ''' requête admin_velo_5  '''
+        sql = '''DELETE FROM ligne_panier WHERE id_velo = %s'''
+        mycursor.execute(sql, id_velo)
+
+        sql = '''DELETE FROM ligne_commande WHERE id_velo = %s'''
+        mycursor.execute(sql, id_velo)
+
+        sql = ''' DELETE FROM velo WHERE id_velo = %s'''
         mycursor.execute(sql, id_velo)
         get_db().commit()
         if image != None:
@@ -100,6 +124,55 @@ def delete_velo():
         flash(message, 'alert-success')
 
     return redirect('/admin/velo/show')
+
+
+@admin_velo.route('/admin/velo/delete-cascade/', methods=['GET'])
+def delete_velo_cascade():
+    id_velo = request.args.get('id_velo')
+    id_type_velo = request.args.get('id_type_velo')
+    mycursor = get_db().cursor()
+
+    sql = '''SELECT 0  AS nb_declinaison, \
+                    '' AS image
+             FROM velo \
+             WHERE id_velo = %s'''
+    mycursor.execute(sql, id_velo)
+    nb_declinaison = mycursor.fetchone()
+
+    if nb_declinaison and nb_declinaison['nb_declinaison'] > 0:
+        message = u'il y a des declinaisons dans cet velo : vous ne pouvez pas le supprimer'
+        flash(message, 'alert-warning')
+    else:
+        sql = ''' SELECT photo AS image \
+                  FROM velo \
+                  WHERE id_velo = %s'''
+        mycursor.execute(sql, id_velo)
+        velo = mycursor.fetchone()
+        image = velo['image']
+
+        sql = '''DELETE \
+                 FROM ligne_panier \
+                 WHERE id_velo = %s'''
+        mycursor.execute(sql, id_velo)
+
+        sql = '''DELETE \
+                 FROM ligne_commande \
+                 WHERE id_velo = %s'''
+        mycursor.execute(sql, id_velo)
+
+        sql = ''' DELETE \
+                  FROM velo \
+                  WHERE id_velo = %s'''
+        mycursor.execute(sql, id_velo)
+        get_db().commit()
+        if image != None:
+            os.remove('static/images/' + image)
+
+        print("un velo supprimé, id :", id_velo)
+        message = u'un velo supprimé, id : ' + id_velo
+        flash(message, 'alert-success')
+
+    return redirect(f'/admin/type-velo/delete?id_type_velo={id_type_velo}')
 
 
 @admin_velo.route('/admin/velo/edit', methods=['GET'])
@@ -120,9 +193,9 @@ def edit_velo():
 
     mycursor.execute(sql, id_velo)
     velo = mycursor.fetchone()
-    print(velo)
+
     sql = '''
-    SELECT id_type_velo,
+    SELECT id_type_velo AS id_type_velo,
           libelle_type_velo AS libelle
     FROM type_velo
     '''
@@ -151,9 +224,9 @@ def valid_edit_velo():
     type_velo_id = request.form.get('type_velo_id', '')
     prix = request.form.get('prix', '')
     description = request.form.get('description')
-    sql = '''
-       requête admin_velo_8
-       '''
+    stock = request.form.get('stock')
+
+    sql = ''' SELECT photo AS image FROM velo WHERE id_velo = %s'''
     mycursor.execute(sql, id_velo)
     image_nom = mycursor.fetchone()
     image_nom = image_nom['image']
@@ -167,8 +240,38 @@ def valid_edit_velo():
             image.save(os.path.join('static/images/', filename))
             image_nom = filename
 
-    sql = '''  requête admin_velo_9 '''
-    mycursor.execute(sql, (nom, image_nom, prix, type_velo_id, description, id_velo))
+    print(type_velo_id)
+    sql = '''  UPDATE velo SET nom_velo = %s, photo = %s, prix_velo = %s, velo.id_type_velo = %s, description = %s , stock = %s WHERE id_velo = %s '''
+    mycursor.execute(sql, (nom, image_nom, prix, type_velo_id, description, stock, id_velo))
+
+
+    sql = '''
+        SELECT COALESCE(COUNT(ligne_panier.id_velo), 0) AS nbr_paniers, COALESCE(SUM(quantite), 0) AS nbr_velos_panier
+        FROM ligne_panier
+        WHERE id_velo = %s
+    '''
+    mycursor.execute(sql, id_velo)
+    result = mycursor.fetchone()
+    nbr_velos_panier = int(result['nbr_velos_panier'])
+    nbr_paniers = int(result['nbr_paniers'])
+
+    if stock < nbr_velos_panier:
+        left = nbr_paniers - stock
+
+        sql = '''
+            SELECT quantite, id_utilisateur, id_velo
+            FROM ligne_panier
+            WHERE id_velo = %s
+        '''
+        mycursor.execute(sql, id_velo)
+        paniers = mycursor.fetchmany(nbr_paniers)
+
+        for panier in paniers:
+            sub = math.ceil((panier['quantite'] / nbr_velos_panier) * left)
+            sql = ''' UPDATE ligne_panier SET quantite = quantite - %s WHERE id_velo = %s AND id_utilisateur = %s '''
+            mycursor.execute(sql, (sub, id_velo, panier['id_utilisateur']))
+            left -= sub
+
 
     get_db().commit()
     if image_nom is None:

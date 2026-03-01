@@ -1,18 +1,18 @@
 {% extends 'admin/layout_admin.html' %}
 
 {% block title %}
-    <title>afficher les types d'velo</title>
+    <title>afficher les types de velo</title>
 {% endblock %}
 
 {% block body %}
-<h3>Déclinaison et/ou type d'velo (catégorie)</h3>
-<a class="btn btn-outline-success" href="/admin/type-velo/add">ajouter un type d'velo</a>
+<h3>Déclinaison et/ou type de velo (catégorie)</h3>
+<a class="btn btn-outline-success" href="/admin/type-velo/add">ajouter un type de velo</a>
 <br><br>
 
 <table class="table">
     <thead class="thead-dark">
         <tr>
-           <th>designation</th> <th>(id_type_velo)</th><th>nombre d'velos</th><th>opération</th>
+           <th>designation</th> <th>(id_type_velo)</th><th>nombre de velos</th><th>opération</th>
         </tr>
     </thead>
     <tbody>
@@ -31,7 +31,7 @@
     {% else %}
             <tr>
                   <td>
-                      pas de type d'velo
+                      pas de type de velo
                   </td>
            </tr>
     {% endif %}

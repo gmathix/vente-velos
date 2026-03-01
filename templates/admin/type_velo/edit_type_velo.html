@@ -1,7 +1,7 @@
 {% extends 'admin/layout_admin.html' %}
 
 {% block title %}
-    <title>modifier un type d'velo</title>
+    <title>modifier un type de velo</title>
 {% endblock %}
 
 {% block body %}
@@ -10,7 +10,7 @@
   {% endif %}
   <form method="post" action="/admin/type-velo/edit">
     <fieldset>
-        <legend> Modifier un type d'velo</legend>
+        <legend> Modifier un type de velo</legend>
         <div class="mb-3">
         <input type="hidden" name="id_type_velo" size="18" value="{{ type_velo.id_type_velo }}" id="id">
         <label for="libelle">libellé</label><br>

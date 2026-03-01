@@ -1,4 +1,4 @@
-#! /usr/bin/python
+
 # -*- coding:utf-8 -*-
 from flask import *
 import datetime
@@ -130,7 +130,6 @@ def fct_fixtures_load():
     nom_velo VARCHAR(50),
     prix_velo DECIMAL(9,2),
     taille_id INT,
-    type_velo_id INT,
     matiere VARCHAR(50),
     description VARCHAR(100),
     fournisseur VARCHAR(50),

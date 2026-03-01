@@ -1,9 +1,10 @@
-#! /usr/bin/python
+
 # -*- coding:utf-8 -*-
 from flask import Blueprint
 from flask import Flask, request, render_template, redirect, url_for, abort, flash, session, g
 from datetime import datetime
 from connexion_db import get_db
+import time
 
 client_commande = Blueprint('client_commande', __name__,
                         template_folder='templates')
@@ -61,21 +62,62 @@ def client_commande_add():
     # choix de(s) (l')adresse(s)
 
     id_client = session['id_user']
-    sql = ''' selection du contenu du panier de l'utilisateur '''
-    items_ligne_panier = []
+    sql = '''
+        SELECT velo.id_velo AS id_velo, 
+                nom_velo AS nom,
+                quantite AS quantite,
+                velo.id_taille AS id_taille,
+                libelle_taille AS libelle_taille,
+                prix_velo AS prix,
+                stock AS stock
+        FROM ligne_panier
+        INNER JOIN velo ON ligne_panier.id_velo = velo.id_velo
+        INNER JOIN taille ON velo.id_taille = taille.id_taille
+        WHERE ligne_panier.id_utilisateur = %s
+    '''
+    mycursor.execute(sql, id_client)
+    items_ligne_panier = mycursor.fetchall()
+
     # if items_ligne_panier is None or len(items_ligne_panier) < 1:
     #     flash(u'Pas d\'velos dans le ligne_panier', 'alert-warning')
     #     return redirect('/client/velo/show')
-                                           # https://pynative.com/python-mysql-transaction-management-using-commit-rollback/
-    #a = datetime.strptime('my date', "%b %d %Y %H:%M")
 
-    sql = ''' creation de la commande '''
+    sql = '''
+    SELECT id_adresse 
+    FROM adresse
+    WHERE id_utilisateur = %s
+    '''
+    mycursor.execute(sql, id_client)
+    id_adresse = mycursor.fetchone()['id_adresse']
+
+    sql = '''
+    SELECT id_etat
+    FROM etat
+    WHERE libelle = 'en attente'
+    '''
+    mycursor.execute(sql)
+    id_etat = mycursor.fetchone()['id_etat']
+
+    # a = datetime.strptime(str(datetime.now().replace(second=0, microsecond=0)), "%b %d %Y %H:%M")
+    # print(a)
+
+    sql = ''' INSERT INTO commande (date_achat, utilisateur_id, id_adresse_livraison, id_adresse_facture, id_etat) VALUES 
+          (%s, %s, %s, %s, %s) '''
+    mycursor.execute(sql, (datetime.now(), id_client, id_adresse, id_adresse, id_etat))
 
     sql = '''SELECT last_insert_id() as last_insert_id'''
+    mycursor.execute(sql)
+    id_commande = mycursor.fetchone()['last_insert_id']
     # numéro de la dernière commande
     for item in items_ligne_panier:
-        sql = ''' suppression d'une ligne de panier '''
-        sql = "  ajout d'une ligne de commande'"
+        sql = ''' DELETE FROM ligne_panier WHERE id_velo = %s '''
+        mycursor.execute(sql, item['id_velo'])
+
+        sql = '''
+              INSERT INTO ligne_commande (id_velo, id_commande, prix, quantite) VALUES 
+                  (%s, %s, %s, %s)
+        '''
+        mycursor.execute(sql, (item['id_velo'],id_commande, item['prix'], item['quantite']))
 
     get_db().commit()
     flash(u'Commande ajoutée','alert-success')
