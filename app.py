@@ -4,9 +4,10 @@
 from flask import Flask, request, render_template, redirect, url_for, abort, flash, session, g
 from flask import Blueprint
 
-
 from controllers.auth_security import *
 from controllers.fixtures_load import *
+
+
 
 from controllers.client_velo import *
 from controllers.client_panier import *
@@ -21,6 +22,7 @@ from controllers.admin_type_velo import *
 from controllers.admin_dataviz import *
 from controllers.admin_commentaire import *
 from controllers.client_liste_envies import *
+
 
 app = Flask(__name__)
 app.secret_key = 'une cle(token) : grain de sel(any random string)'

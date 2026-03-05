@@ -1,6 +1,4 @@
 # -*- coding:utf-8 -*-
-from idlelib.idle import idlelib_dir
-
 from flask import Blueprint
 from flask import Flask, request, render_template, redirect, url_for, abort, flash, session, g
 
