@@ -255,6 +255,7 @@ def valid_edit_velo():
         FROM ligne_panier
         WHERE id_velo = %s
     '''
+    stock = int(stock)
     mycursor.execute(sql, id_velo)
     result = mycursor.fetchone()
     nbr_velos_panier = int(result['nbr_velos_panier'])
