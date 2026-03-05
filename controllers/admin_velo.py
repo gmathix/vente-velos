@@ -21,11 +21,16 @@ def show_velo():
     sql = ''' 
      SELECT nom_velo AS nom,
          id_velo AS id_velo,
-         id_type_velo AS type_velo_id,
+         libelle_type_velo AS libelle_type_velo,
+         velo.id_type_velo AS type_velo_id,
+         libelle_taille AS libelle_taille,
+         velo.id_taille AS taille_id,
          prix_velo AS prix,
          stock AS stock,
          photo AS image
      FROM velo
+         INNER JOIN type_velo ON velo.id_type_velo = type_velo.id_type_velo
+         INNER JOIN taille ON velo.id_taille = taille.id_taille
           '''
     mycursor.execute(sql)
     velos = mycursor.fetchall()

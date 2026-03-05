@@ -160,9 +160,9 @@ def client_commande_show():
               FROM ligne_commande
                        INNER JOIN commande ON ligne_commande.id_commande = commande.id_commande
                        INNER JOIN utilisateur ON commande.utilisateur_id = utilisateur.id_utilisateur
-              WHERE ligne_commande.id_commande = %s \
+              WHERE ligne_commande.id_commande = %s  AND commande.utilisateur_id = %s
               '''
-        mycursor.execute(sql, id_commande)
+        mycursor.execute(sql, (id_commande, id_client))
         velos_commande = mycursor.fetchall()
 
         # partie 2 : selection de l'adresse de livraison et de facturation de la commande selectionnée
