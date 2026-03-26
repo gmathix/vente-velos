@@ -1,8 +1,11 @@
 DROP TABLE IF EXISTS note, liste_envie, historique, commentaire, ligne_panier, ligne_commande,
     declinaison_velo, commande, velo, adresse, taille,
-    etat, utilisateur, type_velo;
+    etat, utilisateur, type_velo, couleur;
 
 
+-- ============================================
+-- DDL
+-- ============================================
 
 CREATE TABLE type_velo(
    id_type_velo INT AUTO_INCREMENT,
@@ -46,18 +49,21 @@ CREATE TABLE adresse(
    FOREIGN KEY(id_utilisateur) REFERENCES utilisateur(id_utilisateur)
 );
 
+CREATE TABLE couleur(
+   id_couleur INT AUTO_INCREMENT,
+   libelle VARCHAR(50),
+   code_couleur INT,
+   PRIMARY KEY(id_couleur)
+);
+
 CREATE TABLE velo(
    id_velo INT AUTO_INCREMENT,
    nom_velo VARCHAR(50),
    prix_velo DECIMAL(9,2),
-   taille_id INT,
-   type_velo_id INT,
    matiere VARCHAR(50),
    description VARCHAR(100),
    fournisseur VARCHAR(50),
    marque VARCHAR(50),
-   photo VARCHAR(50),
-   stock INT,
    id_type_velo INT NOT NULL,
    PRIMARY KEY(id_velo),
    FOREIGN KEY(id_type_velo) REFERENCES type_velo(id_type_velo)
@@ -66,12 +72,12 @@ CREATE TABLE velo(
 CREATE TABLE commande(
    id_commande INT AUTO_INCREMENT,
    date_achat DATE,
-   utilisateur_id INT,
-   etat_id INT,
+   id_utilisateur INT NOT NULL,
    id_etat INT NOT NULL,
    id_adresse INT NOT NULL,
    id_adresse_1 INT NOT NULL,
    PRIMARY KEY(id_commande),
+   FOREIGN KEY(id_utilisateur) REFERENCES utilisateur(id_utilisateur),
    FOREIGN KEY(id_etat) REFERENCES etat(id_etat),
    FOREIGN KEY(id_adresse) REFERENCES adresse(id_adresse),
    FOREIGN KEY(id_adresse_1) REFERENCES adresse(id_adresse)
@@ -82,9 +88,11 @@ CREATE TABLE declinaison_velo(
    stock INT,
    prix_declinaison DECIMAL(15,2),
    image VARCHAR(50),
-   id_taille INT NOT NULL,
+   id_couleur INT,
+   id_taille INT,
    id_velo INT NOT NULL,
    PRIMARY KEY(id_declinaison_velo),
+   FOREIGN KEY(id_couleur) REFERENCES couleur(id_couleur),
    FOREIGN KEY(id_taille) REFERENCES taille(id_taille),
    FOREIGN KEY(id_velo) REFERENCES velo(id_velo)
 );
@@ -148,42 +156,21 @@ CREATE TABLE note(
 );
 
 
--- ============================================================
--- NOUVEAU JEU DE TEST - Nouveau schéma avec declinaison_velo
--- ============================================================
--- NOTE : Les tables commentaire, historique, liste_envie
--- contiennent des FOREIGN KEY vers des tables inexistantes
--- (date_publication, date_consultation, date_update).
--- Ces contraintes doivent être corrigées dans le DDL avant
--- d'exécuter ces INSERT.
--- ============================================================
-
 
 -- ============================================
--- TABLE: taille (inchangée)
--- ============================================
-INSERT INTO taille (libelle) VALUES
-('XS'),
-('S'),
-('M'),
-('L'),
-('XL'),
-('Taille unique');
-
--- ============================================
--- TABLE: type_velo (inchangée)
+-- TABLE: type_velo
 -- ============================================
 INSERT INTO type_velo (libelle_type_velo) VALUES
-('BMX'),
-('Ville'),
-('VTT'),
-('Enfant'),
-('Pliant'),
-('VTC'),
-('Route');
+('BMX'),    -- 1
+('Ville'),  -- 2
+('VTT'),    -- 3
+('Enfant'), -- 4
+('Pliant'), -- 5
+('VTC'),    -- 6
+('Route');  -- 7
 
 -- ============================================
--- TABLE: utilisateur (inchangée)
+-- TABLE: utilisateur
 -- ============================================
 INSERT INTO utilisateur (id_utilisateur, login, email, password, role, nom, est_actif) VALUES
 (1, 'admin',   'admin@admin.fr',
@@ -197,182 +184,245 @@ INSERT INTO utilisateur (id_utilisateur, login, email, password, role, nom, est_
     'ROLE_client', 'client2', 1);
 
 -- ============================================
--- TABLE: etat (inchangée)
+-- TABLE: etat
 -- ============================================
 INSERT INTO etat (libelle) VALUES
-('en attente'),
-('expédié'),
-('validé'),
-('confirmé');
+('en attente'), -- 1
+('expédié'),    -- 2
+('validé'),     -- 3
+('confirmé');   -- 4
 
 -- ============================================
--- TABLE: adresse (inchangée)
+-- TABLE: taille
+-- Tailles en pouces, cohérentes avec les descriptions des vélos.
+-- code_taille = valeur numérique en pouces (0 = taille unique)
+-- ============================================
+INSERT INTO taille (libelle, code_taille) VALUES
+('16 pouces', 16),  -- 1 : enfants petits
+('20 pouces', 20),  -- 2 : BMX, enfants grands
+('24 pouces', 24),  -- 3 : junior / petits adultes
+('26 pouces', 26),  -- 4 : adulte standard VTT/ville
+('28 pouces', 28),  -- 5 : adulte route/ville/VTC
+('29 pouces', 29),  -- 6 : VTT grande roue
+('Taille unique', 0); -- 7 : pliant
+
+-- ============================================
+-- TABLE: couleur
+-- code_couleur = valeur hexadécimale en décimal (ex: 0xFF6600 -> 16737792)
+-- ============================================
+INSERT INTO couleur (libelle, code_couleur) VALUES
+('Orange',  16737792),  -- 1  #FF6600
+('Noir',           0),  -- 2  #000000
+('Jaune',   16766720),  -- 3  #FFD700
+('Blanc',   16777215),  -- 4  #FFFFFF
+('Rose',    16738740),  -- 5  #FF69B4
+('Rouge',   16711680),  -- 6  #FF0000
+('Bleu',    2003199),   -- 7  #1E90FF
+('Gris',    8421504),   -- 8  #808080
+('Marron',  9127187);   -- 9  #8B4513
+
+-- ============================================
+-- TABLE: adresse
 -- ============================================
 INSERT INTO adresse (nom, rue, code_postal, ville, date_utilisation, id_utilisateur) VALUES
-('Belfort', 'rue des raverottes', 80000, 'belfort', '2025-12-12', 2),
-('Belfort', 'rue des belfortains', 80000, 'belfort', '2025-02-12', 2);
+('Belfort', 'rue des raverottes',  80000, 'belfort', '2025-12-12', 2), -- 1
+('Belfort', 'rue des belfortains', 80000, 'belfort', '2025-02-12', 2); -- 2
 
 -- ============================================
 -- TABLE: velo
--- prix_velo, stock, photo, id_taille migrent vers declinaison_velo
+-- prix_velo = prix de base du modèle (les déclinaisons peuvent varier légèrement)
 -- ============================================
-INSERT INTO velo (nom_velo, matiere, description, fournisseur, marque, id_type_velo) VALUES
+INSERT INTO velo (nom_velo, prix_velo, matiere, description, fournisseur, marque, id_type_velo) VALUES
 -- BMX
-('BMX Orange',        'Aluminium', 'BMX orange 20 pouces, 1 vitesse, freins patins',                               'Fournisseur BMX',  'BikeShop',      1),
+('BMX Orange',        100.00, 'Aluminium', 'BMX 20 pouces, 1 vitesse, freins patins',                              'Fournisseur BMX', 'BikeShop',     1), -- 1
 -- Ville
-('Velo ville noir',   'Acier',     'Vélo ville noir 26", 7 vitesses, éclairage dynamo, panier et porte-bagage',    'Urban Bikes',      'CityCycle',     2),
-('Velo ville jaune',  'Acier',     'Vélo ville jaune 24", 3 vitesses, garde-boue, panier et porte-bagage',         'Urban Bikes',      'CityCycle',     2),
-('Velo ville noir',   'Acier',     'Vélo ville noir 26", 3 vitesses, freins disques, éclairage dynamo',            'Urban Bikes',      'VilleConfort',  2),
-('Velo ville rose',   'Acier',     'Vélo ville rose 26", 3 vitesses, freins disques, dynamo, accessoires complets','Urban Bikes',      'CityCycle',     2),
-('Velo ville orange', 'Acier',     'Vélo ville orange 26", 3 vitesses, éclairage dynamo, porte-bagage',            'Urban Bikes',      'VilleConfort',  2),
-('Velo ville bleu',   'Aluminium', 'Vélo ville bleu 28", 3 vitesses, éclairage dynamo, porte-bagage',              'Urban Bikes',      'AluminiumPro',  2),
-('Velo ville blanc',  'Acier',     'Vélo ville blanc 24", 3 vitesses, freins disques, équipement complet',         'Urban Bikes',      'CityCycle',     2),
+('Velo ville noir',   500.00, 'Acier',     'Vélo ville 26", 7 vitesses, éclairage dynamo, panier et porte-bagage', 'Urban Bikes',     'CityCycle',    2), -- 2
+('Velo ville jaune',  300.00, 'Acier',     'Vélo ville 24", 3 vitesses, garde-boue, panier et porte-bagage',       'Urban Bikes',     'CityCycle',    2), -- 3
+('Velo ville noir',   450.00, 'Acier',     'Vélo ville 26", 3 vitesses, freins disques, éclairage dynamo',         'Urban Bikes',     'VilleConfort', 2), -- 4
+('Velo ville rose',   450.00, 'Acier',     'Vélo ville 26", 3 vitesses, freins disques, dynamo, acc. complets',    'Urban Bikes',     'CityCycle',    2), -- 5
+('Velo ville orange', 350.00, 'Acier',     'Vélo ville 26", 3 vitesses, éclairage dynamo, porte-bagage',           'Urban Bikes',     'VilleConfort', 2), -- 6
+('Velo ville bleu',   350.00, 'Aluminium', 'Vélo ville 28", 3 vitesses, éclairage dynamo, porte-bagage',           'Urban Bikes',     'AluminiumPro', 2), -- 7
+('Velo ville blanc',  300.00, 'Acier',     'Vélo ville 24", 3 vitesses, freins disques, équipement complet',       'Urban Bikes',     'CityCycle',    2), -- 8
 -- VTT
-('VTT orange',        'Aluminium', 'VTT orange 26", 21 vitesses, freins disques',                                  'Mountain Gear',    'TrailPro',      3),
-('VTT noir',          'Aluminium', 'VTT noir 28", 27 vitesses, freins disques, éclairage piles, garde-boue',       'Mountain Gear',    'AlpineSport',   3),
-('VTT noir',          'Aluminium', 'VTT noir 26", 27 vitesses, freins patins',                                     'Mountain Gear',    'TrailPro',      3),
-('VTT orange',        'Acier',     'VTT orange 28", 30 vitesses, freins disques haute performance',                'Mountain Gear',    'ProSport',      3),
+('VTT orange',        450.00, 'Aluminium', 'VTT 26", 21 vitesses, freins disques',                                 'Mountain Gear',   'TrailPro',     3), -- 9
+('VTT noir',          750.00, 'Aluminium', 'VTT 28", 27 vitesses, freins disques, éclairage piles, garde-boue',    'Mountain Gear',   'AlpineSport',  3), -- 10
+('VTT noir',          600.00, 'Aluminium', 'VTT 26", 27 vitesses, freins patins',                                  'Mountain Gear',   'TrailPro',     3), -- 11
+('VTT orange',        800.00, 'Acier',     'VTT 28", 30 vitesses, freins disques haute performance',               'Mountain Gear',   'ProSport',     3), -- 12
 -- Enfant
-('Velo enfant noir',  'Acier',     'Vélo enfant noir 16", 5 vitesses, garde-boue',                                 'Kids Bikes',       'Junior',        4),
-('Velo enfant bleu',  'Acier',     'Vélo enfant bleu 20", 5 vitesses, éclairage dynamo, garde-boue, panier',       'Kids Bikes',       'Junior',        4),
+('Velo enfant noir',  200.00, 'Acier',     'Vélo enfant 16", 5 vitesses, garde-boue',                              'Kids Bikes',      'Junior',       4), -- 13
+('Velo enfant bleu',  300.00, 'Acier',     'Vélo enfant 20", 5 vitesses, éclairage dynamo, garde-boue, panier',    'Kids Bikes',      'Junior',       4), -- 14
 -- Pliant
-('Velo pliant',       'Acier',     'Vélo pliant bleu 16", 6 vitesses, éclairage piles, compact et pratique',       'Compact Wheels',   'FoldMaster',    5),
+('Velo pliant',      1000.00, 'Acier',     'Vélo pliant 16", 6 vitesses, éclairage piles, compact et pratique',   'Compact Wheels',  'FoldMaster',   5), -- 15
 -- VTC
-('VTC bleu',          'Acier',     'VTC bleu 28", 15 vitesses, éclairage dynamo, garde-boue, porte-bagage',        'Hybrid Cycles',    'Polyvalent',    6),
+('VTC bleu',          400.00, 'Acier',     'VTC 28", 15 vitesses, éclairage dynamo, garde-boue, porte-bagage',     'Hybrid Cycles',   'Polyvalent',   6), -- 16
 -- Route
-('Velo route bleu',   'Acier',     'Vélo route bleu 28", 10 vitesses, freins patins',                              'Speed Bikes',      'RacePro',       7),
-('Velo route marron', 'Acier',     'Vélo route marron 28", 10 vitesses, freins patins',                            'Speed Bikes',      'ClassicRoad',   7),
-('Velo route rouge',  'Acier',     'Vélo route rouge 28", 15 vitesses, freins patins, performance',                'Speed Bikes',      'RacePro',       7);
+('Velo route bleu',   300.00, 'Acier',     'Vélo route 28", 10 vitesses, freins patins',                           'Speed Bikes',     'RacePro',      7), -- 17
+('Velo route marron', 250.00, 'Acier',     'Vélo route 28", 10 vitesses, freins patins',                           'Speed Bikes',     'ClassicRoad',  7), -- 18
+('Velo route rouge',  400.00, 'Acier',     'Vélo route 28", 15 vitesses, freins patins, performance',              'Speed Bikes',     'RacePro',      7); -- 19
 
 -- ============================================
 -- TABLE: declinaison_velo
--- Mapping 1:1 avec les vélos (id_declinaison = id_velo)
--- Les champs stock/prix/image/taille sont extraits de l'ancien velo
+-- Chaque vélo a 2-3 déclinaisons variant la couleur et/ou la taille.
+-- Même image pour toutes les déclinaisons d'un même vélo.
+-- id_declinaison_velo est AUTO_INCREMENT global : 1 -> 39
+--
+-- Correspondance couleur : 1=Orange 2=Noir 3=Jaune 4=Blanc 5=Rose
+--                          6=Rouge  7=Bleu  8=Gris  9=Marron
+-- Correspondance taille  : 1=16" 2=20" 3=24" 4=26" 5=28" 6=29" 7=Taille unique
 -- ============================================
-INSERT INTO declinaison_velo (stock, prix_declinaison, image, id_taille, id_velo) VALUES
---  stock  prix      image           id_taille  id_velo
-(    8,   100.00,  'BMX1.jpg',          6,       1),  -- BMX Orange
-(   12,   500.00,  'ville1.jpg',        3,       2),  -- Velo ville noir 500
-(   10,   300.00,  'ville2.jpg',        2,       3),  -- Velo ville jaune
-(    7,   450.00,  'ville3.jpg',        3,       4),  -- Velo ville noir 450
-(    9,   450.00,  'ville4.jpeg',       3,       5),  -- Velo ville rose
-(   11,   350.00,  'ville5.jpg',        3,       6),  -- Velo ville orange
-(    8,   350.00,  'ville6.jpg',        4,       7),  -- Velo ville bleu
-(    6,   300.00,  'ville7.jpg',        2,       8),  -- Velo ville blanc
-(    5,   450.00,  'vtt1.jpeg',         3,       9),  -- VTT orange 450
-(    4,   750.00,  'vtt2.jpeg',         4,      10),  -- VTT noir 750
-(    6,   600.00,  'vtt3.jpeg',         3,      11),  -- VTT noir 600
-(    3,   800.00,  'vtt4.jpeg',         4,      12),  -- VTT orange 800
-(   15,   200.00,  'enfant1.jpeg',      1,      13),  -- Velo enfant noir
-(   12,   300.00,  'enfant2.jpeg',      1,      14),  -- Velo enfant bleu
-(    5,  1000.00,  'pliant1.jpeg',      6,      15),  -- Velo pliant
-(    7,   400.00,  'vtc1.jpeg',         4,      16),  -- VTC bleu
-(    6,   300.00,  'route1.jpeg',       4,      17),  -- Velo route bleu
-(    8,   250.00,  'route2.jpeg',       4,      18),  -- Velo route marron
-(    5,   400.00,  'route3.jpeg',       4,      19);  -- Velo route rouge
+INSERT INTO declinaison_velo (id_velo, stock, prix_declinaison, image, id_couleur, id_taille) VALUES
+-- Velo 1 : BMX Orange — décl 1 et 2
+(1,  8,  100.00, 'BMX1.jpg',      1, 2),  -- decl  1 : Orange  / 20"
+(1,  5,  100.00, 'BMX1.jpg',      2, 2),  -- decl  2 : Noir    / 20"
+-- Velo 2 : Velo ville noir CityCycle — décl 3 et 4
+(2, 12,  500.00, 'ville1.jpg',    2, 4),  -- decl  3 : Noir    / 26"
+(2,  6,  500.00, 'ville1.jpg',    8, 4),  -- decl  4 : Gris    / 26"
+-- Velo 3 : Velo ville jaune CityCycle — décl 5 et 6
+(3, 10,  300.00, 'ville2.jpg',    3, 3),  -- decl  5 : Jaune   / 24"
+(3,  7,  300.00, 'ville2.jpg',    4, 3),  -- decl  6 : Blanc   / 24"
+-- Velo 4 : Velo ville noir VilleConfort — décl 7 et 8
+(4,  7,  450.00, 'ville3.jpg',    2, 4),  -- decl  7 : Noir    / 26"
+(4,  4,  470.00, 'ville3.jpg',    2, 5),  -- decl  8 : Noir    / 28"  (+20€)
+-- Velo 5 : Velo ville rose — décl 9 et 10
+(5,  9,  450.00, 'ville4.jpeg',   5, 4),  -- decl  9 : Rose    / 26"
+(5,  5,  450.00, 'ville4.jpeg',   4, 4),  -- decl 10 : Blanc   / 26"
+-- Velo 6 : Velo ville orange — décl 11 et 12
+(6, 11,  350.00, 'ville5.jpg',    1, 4),  -- decl 11 : Orange  / 26"
+(6,  6,  350.00, 'ville5.jpg',    6, 4),  -- decl 12 : Rouge   / 26"
+-- Velo 7 : Velo ville bleu AluminiumPro — décl 13 et 14
+(7,  8,  350.00, 'ville6.jpg',    7, 5),  -- decl 13 : Bleu    / 28"
+(7,  4,  350.00, 'ville6.jpg',    2, 5),  -- decl 14 : Noir    / 28"
+-- Velo 8 : Velo ville blanc — décl 15 et 16
+(8,  6,  300.00, 'ville7.jpg',    4, 3),  -- decl 15 : Blanc   / 24"
+(8,  4,  300.00, 'ville7.jpg',    8, 3),  -- decl 16 : Gris    / 24"
+-- Velo 9 : VTT orange TrailPro — décl 17, 18 et 19
+(9,  5,  450.00, 'vtt1.jpeg',     1, 4),  -- decl 17 : Orange  / 26"
+(9,  3,  450.00, 'vtt1.jpeg',     2, 4),  -- decl 18 : Noir    / 26"
+(9,  3,  480.00, 'vtt1.jpeg',     1, 6),  -- decl 19 : Orange  / 29"  (+30€)
+-- Velo 10 : VTT noir AlpineSport — décl 20 et 21
+(10, 4,  750.00, 'vtt2.jpeg',     2, 5),  -- decl 20 : Noir    / 28"
+(10, 2,  780.00, 'vtt2.jpeg',     2, 6),  -- decl 21 : Noir    / 29"  (+30€)
+-- Velo 11 : VTT noir TrailPro — décl 22 et 23
+(11, 6,  600.00, 'vtt3.jpeg',     2, 4),  -- decl 22 : Noir    / 26"
+(11, 3,  630.00, 'vtt3.jpeg',     2, 6),  -- decl 23 : Noir    / 29"  (+30€)
+-- Velo 12 : VTT orange ProSport — décl 24 et 25
+(12, 3,  800.00, 'vtt4.jpeg',     1, 5),  -- decl 24 : Orange  / 28"
+(12, 2,  830.00, 'vtt4.jpeg',     1, 6),  -- decl 25 : Orange  / 29"  (+30€)
+-- Velo 13 : Velo enfant noir — décl 26 et 27
+(13, 15, 200.00, 'enfant1.jpeg',  2, 1),  -- decl 26 : Noir    / 16"
+(13,  8, 200.00, 'enfant1.jpeg',  7, 1),  -- decl 27 : Bleu    / 16"
+-- Velo 14 : Velo enfant bleu — décl 28 et 29
+(14, 12, 300.00, 'enfant2.jpeg',  7, 2),  -- decl 28 : Bleu    / 20"
+(14,  7, 300.00, 'enfant2.jpeg',  6, 2),  -- decl 29 : Rouge   / 20"
+-- Velo 15 : Velo pliant — décl 30 et 31
+(15,  5, 1000.00, 'pliant1.jpeg', 7, 7),  -- decl 30 : Bleu    / Taille unique
+(15,  3, 1000.00, 'pliant1.jpeg', 2, 7),  -- decl 31 : Noir    / Taille unique
+-- Velo 16 : VTC bleu — décl 32 et 33
+(16,  7, 400.00, 'vtc1.jpeg',     7, 5),  -- decl 32 : Bleu    / 28"
+(16,  4, 400.00, 'vtc1.jpeg',     2, 5),  -- decl 33 : Noir    / 28"
+-- Velo 17 : Velo route bleu — décl 34 et 35
+(17,  6, 300.00, 'route1.jpeg',   7, 5),  -- decl 34 : Bleu    / 28"
+(17,  4, 300.00, 'route1.jpeg',   6, 5),  -- decl 35 : Rouge   / 28"
+-- Velo 18 : Velo route marron — décl 36 et 37
+(18,  8, 250.00, 'route2.jpeg',   9, 5),  -- decl 36 : Marron  / 28"
+(18,  5, 250.00, 'route2.jpeg',   2, 5),  -- decl 37 : Noir    / 28"
+-- Velo 19 : Velo route rouge — décl 38 et 39
+(19,  5, 400.00, 'route3.jpeg',   6, 5),  -- decl 38 : Rouge   / 28"
+(19,  3, 400.00, 'route3.jpeg',   2, 5);  -- decl 39 : Noir    / 28"
 
 -- ============================================
 -- TABLE: commande
 -- id_adresse = livraison, id_adresse_1 = facture
--- (etat_id est ignoré : doublon sans contrainte FK)
 -- ============================================
-INSERT INTO commande (date_achat, utilisateur_id, id_etat, id_adresse, id_adresse_1) VALUES
--- client (id=2)
-('2024-12-10', 2, 3, 1, 1),  -- validé
-('2025-01-05', 2, 2, 1, 1),  -- expédié
-('2025-01-22', 2, 4, 1, 1),  -- confirmé
-('2025-01-28', 2, 1, 1, 1),  -- en attente
--- client2 (id=3)
-('2024-11-15', 3, 3, 2, 2),  -- validé
-('2025-01-08', 3, 2, 2, 2),  -- expédié
-('2025-01-25', 3, 1, 2, 2);  -- en attente
+INSERT INTO commande (date_achat, id_utilisateur, id_etat, id_adresse, id_adresse_1) VALUES
+('2024-12-10', 2, 3, 1, 1),  -- 1 validé
+('2025-01-05', 2, 2, 1, 1),  -- 2 expédié
+('2025-01-22', 2, 4, 1, 1),  -- 3 confirmé
+('2025-01-28', 2, 1, 1, 1),  -- 4 en attente
+('2024-11-15', 3, 3, 2, 2),  -- 5 validé
+('2025-01-08', 3, 2, 2, 2),  -- 6 expédié
+('2025-01-25', 3, 1, 2, 2);  -- 7 en attente
 
 -- ============================================
 -- TABLE: ligne_commande
--- Référence id_declinaison_velo (= id_velo dans notre mapping 1:1)
+-- Les références (id_velo, id_declinaison_velo) correspondent
+-- aux déclinaisons "de base" de chaque modèle.
 -- ============================================
 INSERT INTO ligne_commande (id_commande, id_declinaison_velo, prix, quantite) VALUES
 -- Commande 1 (client - validé)
-(1,  2,   500.00, 1),  -- Velo ville noir
-(1,  9,   450.00, 1),  -- VTT orange
+(1,   3,   500.00, 1),  -- Velo ville noir / Noir 26"
+(1, 17,   450.00, 1),  -- VTT orange TrailPro / Orange 26"
 -- Commande 2 (client - expédié)
-(2, 10,   750.00, 1),  -- VTT noir 750
-(2, 15,  1000.00, 1),  -- Velo pliant
+(2,  20,   750.00, 1),  -- VTT noir AlpineSport / Noir 28"
+(2, 30,  1000.00, 1),  -- Velo pliant / Bleu taille unique
 -- Commande 3 (client - confirmé)
-(3, 17,   300.00, 1),  -- Velo route bleu
+(3, 34,   300.00, 1),  -- Velo route bleu / Bleu 28"
 -- Commande 4 (client - en attente)
-(4,  1,   100.00, 20), -- BMX Orange x20
-(4, 13,   200.00, 1),  -- Velo enfant noir
+(4,    1,   100.00, 20), -- BMX Orange / Orange 20" x20
+(4, 26,   200.00, 1),  -- Velo enfant noir / Noir 16"
 -- Commande 5 (client2 - validé)
-(5,  4,   450.00, 1),  -- Velo ville noir 450
-(5, 14,   300.00, 1),  -- Velo enfant bleu
+(5,   7,   450.00, 1),  -- Velo ville noir VilleConfort / Noir 26"
+(5, 28,   300.00, 1),  -- Velo enfant bleu / Bleu 20"
 -- Commande 6 (client2 - expédié)
-(6, 17,   400.00, 1),  -- Velo route bleu
+(6,  34,   300.00, 1),  -- Velo route bleu / Bleu 28"
 -- Commande 7 (client2 - en attente)
-(7, 16,   400.00, 1),  -- VTC bleu
-(7,  8,   350.00, 1);  -- Velo ville blanc
+(7,  32,   400.00, 1),  -- VTC bleu / Bleu 28"
+(7,   15,   300.00, 1);  -- Velo ville blanc / Blanc 24"
 
 -- ============================================
 -- TABLE: ligne_panier
--- Référence id_declinaison_velo
 -- ============================================
 INSERT INTO ligne_panier (id_utilisateur, id_declinaison_velo, quantite, date_ajout) VALUES
 -- Panier client (id=2)
-(2, 11, 1, '2025-01-28'),  -- VTT noir 600
-(2,  5, 1, '2025-01-27'),  -- Velo ville rose
-(2, 18, 1, '2025-01-26'),  -- Velo route marron
+(2, 22, 1, '2025-01-28'),  -- VTT noir TrailPro / Noir 26"
+(2,    9, 1, '2025-01-27'),  -- Velo ville rose / Rose 26"
+(2,  36, 1, '2025-01-26'),  -- Velo route marron / Marron 28"
 -- Panier client2 (id=3)
-(3,  3, 1, '2025-01-29'),  -- Velo ville jaune
-(3,  7, 2, '2025-01-29'),  -- Velo ville bleu x2
-(3, 11, 1, '2025-01-28');  -- VTT noir 600
+(3,   5, 1, '2025-01-29'),  -- Velo ville jaune / Jaune 24"
+(3, 13, 2, '2025-01-29'),  -- Velo ville bleu / Bleu 28" x2
+(3, 22, 1, '2025-01-28');  -- VTT noir TrailPro / Noir 26"
 
 -- ============================================
 -- TABLE: note
 -- ============================================
 INSERT INTO note (id_velo, id_utilisateur, note) VALUES
-(2,  2, 4.5),
-(9,  2, 4.0),
+( 2, 2, 4.5),
+( 9, 2, 4.0),
 (10, 2, 5.0),
-(4,  3, 3.5),
+( 4, 3, 3.5),
 (14, 3, 4.5),
 (17, 3, 4.0),
-(1,  2, 3.0),
+( 1, 2, 3.0),
 (15, 2, 5.0);
 
 -- ============================================
 -- TABLE: commentaire
--- /!\ FOREIGN KEY date_publication -> table inexistante dans le DDL
--- A corriger avant exécution (supprimer cette FK ou créer la table)
 -- ============================================
 INSERT INTO commentaire (id_velo, id_utilisateur, date_publication, valider, commentaire) VALUES
-(2,  2, '2025-01-12', 1, 'Très bon vélo de ville, solide et agréable.'),
-(9,  2, '2025-01-20', 1, 'VTT performant, bon rapport qualité-prix.'),
-(10, 2, '2025-02-01', 0, 'Freins disques excellents, livraison rapide.'),
-(4,  3, '2024-12-01', 1, 'Correct pour un usage quotidien.'),
+( 2, 2, '2025-01-12', 1, 'Très bon vélo de ville, solide.'),
+( 9, 2, '2025-01-20', 1, 'VTT performant, bon rapport qualité-prix.'),
+(10, 2, '2025-02-01', 0, 'Freins disques excellents.'),
+( 4, 3, '2024-12-01', 1, 'Correct pour un usage quotidien.'),
 (14, 3, '2025-01-10', 1, 'Mon enfant adore ce vélo !'),
 (17, 3, '2025-01-15', 1, 'Bon vélo de route pour débuter.');
 
 -- ============================================
 -- TABLE: historique
--- /!\ FOREIGN KEY date_consultation -> table inexistante dans le DDL
--- A corriger avant exécution
 -- ============================================
 INSERT INTO historique (id_velo, id_utilisateur, date_consultation) VALUES
-(1,  2, '2025-01-25'),
-(2,  2, '2025-01-25'),
-(9,  2, '2025-01-26'),
+( 1, 2, '2025-01-25'),
+( 2, 2, '2025-01-25'),
+( 9, 2, '2025-01-26'),
 (10, 2, '2025-01-26'),
 (15, 2, '2025-01-27'),
-(3,  3, '2025-01-28'),
-(4,  3, '2025-01-28'),
-(7,  3, '2025-01-29'),
+( 3, 3, '2025-01-28'),
+( 4, 3, '2025-01-28'),
+( 7, 3, '2025-01-29'),
 (12, 3, '2025-01-29'),
 (17, 3, '2025-01-30');
 
 -- ============================================
 -- TABLE: liste_envie
--- /!\ FOREIGN KEY date_update -> table inexistante dans le DDL
--- A corriger avant exécution
 -- ============================================
 INSERT INTO liste_envie (id_velo, id_utilisateur, date_update) VALUES
 (10, 2, '2025-01-20'),
@@ -380,4 +430,4 @@ INSERT INTO liste_envie (id_velo, id_utilisateur, date_update) VALUES
 (19, 2, '2025-01-24'),
 (12, 3, '2025-01-25'),
 (16, 3, '2025-01-27'),
-(5,  3, '2025-01-29');
+( 5, 3, '2025-01-29');
