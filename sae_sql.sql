@@ -64,6 +64,7 @@ CREATE TABLE velo(
    description VARCHAR(100),
    fournisseur VARCHAR(50),
    marque VARCHAR(50),
+    image VARCHAR(50),
    id_type_velo INT NOT NULL,
    PRIMARY KEY(id_velo),
    FOREIGN KEY(id_type_velo) REFERENCES type_velo(id_type_velo)
@@ -232,33 +233,33 @@ INSERT INTO adresse (nom, rue, code_postal, ville, date_utilisation, id_utilisat
 -- TABLE: velo
 -- prix_velo = prix de base du modèle (les déclinaisons peuvent varier légèrement)
 -- ============================================
-INSERT INTO velo (nom_velo, prix_velo, matiere, description, fournisseur, marque, id_type_velo) VALUES
+INSERT INTO velo (nom_velo, prix_velo, matiere, description, fournisseur, marque, image, id_type_velo) VALUES
 -- BMX
-('BMX Orange',        100.00, 'Aluminium', 'BMX 20 pouces, 1 vitesse, freins patins',                              'Fournisseur BMX', 'BikeShop',     1), -- 1
+('BMX Orange',        100.00, 'Aluminium', 'BMX 20 pouces, 1 vitesse, freins patins',                              'Fournisseur BMX', 'BikeShop',     'BMX1.jpg',  1), -- 1
 -- Ville
-('Velo ville noir',   500.00, 'Acier',     'Vélo ville 26", 7 vitesses, éclairage dynamo, panier et porte-bagage', 'Urban Bikes',     'CityCycle',    2), -- 2
-('Velo ville jaune',  300.00, 'Acier',     'Vélo ville 24", 3 vitesses, garde-boue, panier et porte-bagage',       'Urban Bikes',     'CityCycle',    2), -- 3
-('Velo ville noir',   450.00, 'Acier',     'Vélo ville 26", 3 vitesses, freins disques, éclairage dynamo',         'Urban Bikes',     'VilleConfort', 2), -- 4
-('Velo ville rose',   450.00, 'Acier',     'Vélo ville 26", 3 vitesses, freins disques, dynamo, acc. complets',    'Urban Bikes',     'CityCycle',    2), -- 5
-('Velo ville orange', 350.00, 'Acier',     'Vélo ville 26", 3 vitesses, éclairage dynamo, porte-bagage',           'Urban Bikes',     'VilleConfort', 2), -- 6
-('Velo ville bleu',   350.00, 'Aluminium', 'Vélo ville 28", 3 vitesses, éclairage dynamo, porte-bagage',           'Urban Bikes',     'AluminiumPro', 2), -- 7
-('Velo ville blanc',  300.00, 'Acier',     'Vélo ville 24", 3 vitesses, freins disques, équipement complet',       'Urban Bikes',     'CityCycle',    2), -- 8
+('Velo ville noir',   500.00, 'Acier',     'Vélo ville 26", 7 vitesses, éclairage dynamo, panier et porte-bagage', 'Urban Bikes',     'CityCycle',   'ville1.jpg',  2), -- 2
+('Velo ville jaune',  300.00, 'Acier',     'Vélo ville 24", 3 vitesses, garde-boue, panier et porte-bagage',       'Urban Bikes',     'CityCycle',    'ville2.jpg',2), -- 3
+('Velo ville noir',   450.00, 'Acier',     'Vélo ville 26", 3 vitesses, freins disques, éclairage dynamo',         'Urban Bikes',     'VilleConfort', 'ville3.jpg',  2), -- 4
+('Velo ville rose',   450.00, 'Acier',     'Vélo ville 26", 3 vitesses, freins disques, dynamo, acc. complets',    'Urban Bikes',     'CityCycle',   'ville4.jpeg',  2), -- 5
+('Velo ville orange', 350.00, 'Acier',     'Vélo ville 26", 3 vitesses, éclairage dynamo, porte-bagage',           'Urban Bikes',     'VilleConfort', 'ville5.jpg', 2), -- 6
+('Velo ville bleu',   350.00, 'Aluminium', 'Vélo ville 28", 3 vitesses, éclairage dynamo, porte-bagage',           'Urban Bikes',     'AluminiumPro','ville6.jpg',   2), -- 7
+('Velo ville blanc',  300.00, 'Acier',     'Vélo ville 24", 3 vitesses, freins disques, équipement complet',       'Urban Bikes',     'CityCycle',   'ville7.jpg',  2), -- 8
 -- VTT
-('VTT orange',        450.00, 'Aluminium', 'VTT 26", 21 vitesses, freins disques',                                 'Mountain Gear',   'TrailPro',     3), -- 9
-('VTT noir',          750.00, 'Aluminium', 'VTT 28", 27 vitesses, freins disques, éclairage piles, garde-boue',    'Mountain Gear',   'AlpineSport',  3), -- 10
-('VTT noir',          600.00, 'Aluminium', 'VTT 26", 27 vitesses, freins patins',                                  'Mountain Gear',   'TrailPro',     3), -- 11
-('VTT orange',        800.00, 'Acier',     'VTT 28", 30 vitesses, freins disques haute performance',               'Mountain Gear',   'ProSport',     3), -- 12
+('VTT orange',        450.00, 'Aluminium', 'VTT 26", 21 vitesses, freins disques',                                 'Mountain Gear',   'TrailPro',  'vtt1.jpeg',     3), -- 9
+('VTT noir',          750.00, 'Aluminium', 'VTT 28", 27 vitesses, freins disques, éclairage piles, garde-boue',    'Mountain Gear',   'AlpineSport', 'vtt2.jpeg',   3), -- 10
+('VTT noir',          600.00, 'Aluminium', 'VTT 26", 27 vitesses, freins patins',                                  'Mountain Gear',   'TrailPro',    'vtt3.jpeg',  3), -- 11
+('VTT orange',        800.00, 'Acier',     'VTT 28", 30 vitesses, freins disques haute performance',               'Mountain Gear',   'ProSport',   'vtt4.jpeg',     3), -- 12
 -- Enfant
-('Velo enfant noir',  200.00, 'Acier',     'Vélo enfant 16", 5 vitesses, garde-boue',                              'Kids Bikes',      'Junior',       4), -- 13
-('Velo enfant bleu',  300.00, 'Acier',     'Vélo enfant 20", 5 vitesses, éclairage dynamo, garde-boue, panier',    'Kids Bikes',      'Junior',       4), -- 14
+('Velo enfant noir',  200.00, 'Acier',     'Vélo enfant 16", 5 vitesses, garde-boue',                              'Kids Bikes',      'Junior',     'enfant1.jpeg',  4), -- 13
+('Velo enfant bleu',  300.00, 'Acier',     'Vélo enfant 20", 5 vitesses, éclairage dynamo, garde-boue, panier',    'Kids Bikes',      'Junior',     'enfant2.jpeg',   4), -- 14
 -- Pliant
-('Velo pliant',      1000.00, 'Acier',     'Vélo pliant 16", 6 vitesses, éclairage piles, compact et pratique',   'Compact Wheels',  'FoldMaster',   5), -- 15
+('Velo pliant',      1000.00, 'Acier',     'Vélo pliant 16", 6 vitesses, éclairage piles, compact et pratique',   'Compact Wheels',  'FoldMaster', 'pliant1.jpeg',  5), -- 15
 -- VTC
-('VTC bleu',          400.00, 'Acier',     'VTC 28", 15 vitesses, éclairage dynamo, garde-boue, porte-bagage',     'Hybrid Cycles',   'Polyvalent',   6), -- 16
+('VTC bleu',          400.00, 'Acier',     'VTC 28", 15 vitesses, éclairage dynamo, garde-boue, porte-bagage',     'Hybrid Cycles',   'Polyvalent',   'vtc1.jpeg',6), -- 16
 -- Route
-('Velo route bleu',   300.00, 'Acier',     'Vélo route 28", 10 vitesses, freins patins',                           'Speed Bikes',     'RacePro',      7), -- 17
-('Velo route marron', 250.00, 'Acier',     'Vélo route 28", 10 vitesses, freins patins',                           'Speed Bikes',     'ClassicRoad',  7), -- 18
-('Velo route rouge',  400.00, 'Acier',     'Vélo route 28", 15 vitesses, freins patins, performance',              'Speed Bikes',     'RacePro',      7); -- 19
+('Velo route bleu',   300.00, 'Acier',     'Vélo route 28", 10 vitesses, freins patins',                           'Speed Bikes',     'RacePro',   'route1.jpeg',   7), -- 17
+('Velo route marron', 250.00, 'Acier',     'Vélo route 28", 10 vitesses, freins patins',                           'Speed Bikes',     'ClassicRoad',  'route2.jpeg', 7), -- 18
+('Velo route rouge',  400.00, 'Acier',     'Vélo route 28", 15 vitesses, freins patins, performance',              'Speed Bikes',     'RacePro',    'route3.jpeg',   7); -- 19
 
 -- ============================================
 -- TABLE: declinaison_velo
