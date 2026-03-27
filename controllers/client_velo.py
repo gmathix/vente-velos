@@ -37,36 +37,41 @@ def client_velo_show():
     filtre_prix_min  = session.get('filter_prix_min', '')
     filtre_prix_max  = session.get('filter_prix_max', '')
 
-    # Construction du SQL avec filtres dynamiques
     sql = '''
         SELECT nom_velo AS nom,
-               prix_velo AS prix,
-               id_velo AS id_velo,
-               photo AS image,
-               stock AS stock,
-               libelle_taille AS libelle_taille
+               velo.id_velo AS id_velo,
+               velo.image AS image,
+                MIN(declinaison_velo.prix_declinaison) AS prix,
+                SUM(declinaison_velo.stock) AS stock,
+                COUNT(declinaison_velo.id_declinaison_velo) AS nb_declinaison
         FROM velo
-        INNER JOIN taille ON velo.id_taille = taille.id_taille
-        WHERE 1=1
+        INNER JOIN declinaison_velo ON velo.id_velo = declinaison_velo.id_velo
     '''
     list_param = []
+    list_conditions = []
 
     if filtre_recherche:
-        sql += ' AND nom_velo LIKE %s'
+        list_conditions.append('(nom_velo LIKE %s)')
         list_param.append(f'%{filtre_recherche}%')
 
     if filtre_types:
         placeholders = ', '.join(['%s'] * len(filtre_types))
-        sql += f' AND velo.id_type_velo IN ({placeholders})'
+        list_conditions.append(f'(velo.id_type_velo IN ({placeholders}))')
         list_param.extend(filtre_types)
 
     if filtre_prix_min:
-        sql += ' AND prix_velo >= %s'
+        list_conditions.append('(prix_velo >= %s)')
         list_param.append(filtre_prix_min)
 
     if filtre_prix_max:
-        sql += ' AND prix_velo <= %s'
+        list_conditions.append('(prix_velo <= %s)')
         list_param.append(filtre_prix_max)
+
+    if len(list_conditions) > 0:
+        sql += "\nWHERE "
+        sql += ' AND '.join(list_conditions)
+
+    sql += "GROUP BY velo.prix_velo, nom_velo, velo.id_velo, velo.image"
 
     mycursor.execute(sql, list_param)
     velos = mycursor.fetchall()
@@ -79,19 +84,26 @@ def client_velo_show():
     types_velo = mycursor.fetchall()
 
     # Panier
-    mycursor.execute('''
-        SELECT velo.id_velo AS id_velo, 
-            nom_velo AS nom,
-               quantite AS quantite,
-               velo.id_taille AS id_taille,
-               libelle_taille AS libelle_taille,
-               prix_velo AS prix,
-                stock AS stock
+    sql = '''
+          SELECT 
+              ligne_panier.id_declinaison_velo AS id_declinaison_velo,
+             velo.nom_velo AS nom,
+             ligne_panier.quantite AS quantite,
+             d.prix_declinaison AS prix,
+             d.stock AS stock,
+            d.id_couleur AS id_couleur,
+            d.id_taille AS id_taille,
+              taille.libelle AS libelle_taille,
+              couleur.libelle AS libelle_couleur
         FROM ligne_panier
-        INNER JOIN velo ON ligne_panier.id_velo = velo.id_velo
-        INNER JOIN taille ON velo.id_taille = taille.id_taille
+        INNER JOIN declinaison_velo d ON ligne_panier.id_declinaison_velo = d.id_declinaison_velo
+        INNER JOIN velo ON d.id_velo = velo.id_velo
+        INNER JOIN taille ON d.id_taille = taille.id_taille
+          INNER JOIN couleur ON d.id_couleur = couleur.id_couleur
         WHERE ligne_panier.id_utilisateur = %s
-    ''', [id_client])
+        GROUP BY id_declinaison_velo, velo.id_velo, velo.nom_velo, ligne_panier.quantite, d.prix_declinaison, d.stock, d.id_couleur, d.id_taille, taille.libelle, couleur.libelle
+    '''
+    mycursor.execute(sql, id_client)
     velos_panier = mycursor.fetchall()
 
     prix_total = None

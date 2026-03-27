@@ -46,4 +46,4 @@
 
 #python app.py
 killall python3
-flask --app app  run --port 8000  --host 0.0.0.0
+flask --app app --debug run --port 8000  --host 0.0.0.0
