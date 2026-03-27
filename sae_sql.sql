@@ -89,6 +89,7 @@ CREATE TABLE declinaison_velo(
    stock INT,
    prix_declinaison DECIMAL(15,2),
    image VARCHAR(50),
+   utilisable BOOLEAN DEFAULT TRUE,
    id_couleur INT,
    id_taille INT,
    id_velo INT NOT NULL,
@@ -226,8 +227,8 @@ INSERT INTO couleur (libelle, code_couleur) VALUES
 -- TABLE: adresse
 -- ============================================
 INSERT INTO adresse (nom, rue, code_postal, ville, date_utilisation, id_utilisateur) VALUES
-('Belfort', 'rue des raverottes',  80000, 'belfort', '2025-12-12', 2), -- 1
-('Belfort', 'rue des belfortains', 80000, 'belfort', '2025-02-12', 2); -- 2
+('67', 'rue des raverottes',  80000, 'belfort', '2025-12-12', 2), -- 1
+('25', 'rue des belfortains', 80000, 'belfort', '2025-02-12', 2); -- 2
 
 -- ============================================
 -- TABLE: velo

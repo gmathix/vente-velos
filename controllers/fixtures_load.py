@@ -85,10 +85,8 @@ def fct_fixtures_load():
     mycursor.execute(sql)
     sql = '''
     INSERT INTO etat (libelle) VALUES
-        ('en attente'), -- 1
-        ('expédié'),    -- 2
-        ('validé'),     -- 3
-        ('confirmé');   -- 4
+        ('en attente'),
+        ('expédié')    
     '''
     mycursor.execute(sql)
 
@@ -136,8 +134,8 @@ def fct_fixtures_load():
     mycursor.execute(sql)
     sql = '''
         INSERT INTO adresse (nom, rue, code_postal, ville, date_utilisation, id_utilisateur) VALUES
-        ('Belfort', 'rue des raverottes',  80000, 'belfort', '2025-12-12', 2), -- 1
-        ('Belfort', 'rue des belfortains', 80000, 'belfort', '2025-02-12', 2); -- 2
+        ('67', 'rue des raverottes',  80000, 'belfort', '2025-12-12', 2), -- 1
+        ('25', 'rue des belfortains', 80000, 'belfort', '2025-02-12', 2); -- 2
     '''
     mycursor.execute(sql)
 
@@ -231,6 +229,7 @@ def fct_fixtures_load():
        stock INT,
        prix_declinaison DECIMAL(15,2),
        image VARCHAR(50),
+       utilisable BOOLEAN DEFAULT TRUE,
        id_couleur INT,
        id_taille INT,
        id_velo INT NOT NULL,
@@ -327,13 +326,13 @@ def fct_fixtures_load():
     mycursor.execute(sql)
     sql = '''
      INSERT INTO commande (date_achat, id_utilisateur, id_etat, id_adresse, id_adresse_1) VALUES
-        ('2024-12-10', 2, 3, 1, 1),  -- 1 validé
-        ('2025-01-05', 2, 2, 1, 1),  -- 2 expédié
-        ('2025-01-22', 2, 4, 1, 1),  -- 3 confirmé
-        ('2025-01-28', 2, 1, 1, 1),  -- 4 en attente
-        ('2024-11-15', 3, 3, 2, 2),  -- 5 validé
-        ('2025-01-08', 3, 2, 2, 2),  -- 6 expédié
-        ('2025-01-25', 3, 1, 2, 2);  -- 7 en attente
+        ('2024-12-10', 2, 2, 1, 1),
+        ('2025-01-05', 2, 2, 1, 1),
+        ('2025-01-22', 2, 2, 1, 1),
+        ('2025-01-28', 2, 1, 1, 1),  
+        ('2024-11-15', 3, 2, 2, 2), 
+        ('2025-01-08', 3, 2, 2, 2), 
+        ('2025-01-25', 3, 1, 2, 2);  
           '''
     mycursor.execute(sql)
 
