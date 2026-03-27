@@ -38,14 +38,16 @@ def client_velo_show():
     filtre_prix_max  = session.get('filter_prix_max', '')
 
     sql = '''
-        SELECT nom_velo AS nom,
-               velo.id_velo AS id_velo,
-               velo.image AS image,
-                MIN(declinaison_velo.prix_declinaison) AS prix,
-                SUM(declinaison_velo.stock) AS stock,
-                COUNT(declinaison_velo.id_declinaison_velo) AS nb_declinaison
-        FROM velo
-        INNER JOIN declinaison_velo ON velo.id_velo = declinaison_velo.id_velo
+        SELECT  V.nom_velo                                AS nom,
+                V.id_velo                                 AS id_velo,
+                V.image                                   AS image,
+                COALESCE(MIN(D.prix_declinaison), 0)      AS prix,
+                SUM(D.stock)                              AS stock,
+                COUNT(D.id_declinaison_velo)              AS nb_declinaison
+            
+        FROM velo AS V
+            
+        LEFT JOIN declinaison_velo D ON V.id_velo = D.id_velo
     '''
     list_param = []
     list_conditions = []
@@ -71,9 +73,11 @@ def client_velo_show():
         sql += "\nWHERE "
         sql += ' AND '.join(list_conditions)
 
-    sql += "GROUP BY velo.prix_velo, nom_velo, velo.id_velo, velo.image"
+    sql += "GROUP BY V.prix_velo, V.nom_velo, V.id_velo, V.image"
 
     mycursor.execute(sql, list_param)
+
+
     velos = mycursor.fetchall()
 
     # Types de vélos pour les cases à cocher
@@ -85,23 +89,27 @@ def client_velo_show():
 
     # Panier
     sql = '''
-          SELECT 
-              ligne_panier.id_declinaison_velo AS id_declinaison_velo,
-             velo.nom_velo AS nom,
-             ligne_panier.quantite AS quantite,
-             d.prix_declinaison AS prix,
-             d.stock AS stock,
-            d.id_couleur AS id_couleur,
-            d.id_taille AS id_taille,
-              taille.libelle AS libelle_taille,
-              couleur.libelle AS libelle_couleur
-        FROM ligne_panier
-        INNER JOIN declinaison_velo d ON ligne_panier.id_declinaison_velo = d.id_declinaison_velo
-        INNER JOIN velo ON d.id_velo = velo.id_velo
-        INNER JOIN taille ON d.id_taille = taille.id_taille
-          INNER JOIN couleur ON d.id_couleur = couleur.id_couleur
-        WHERE ligne_panier.id_utilisateur = %s
-        GROUP BY id_declinaison_velo, velo.id_velo, velo.nom_velo, ligne_panier.quantite, d.prix_declinaison, d.stock, d.id_couleur, d.id_taille, taille.libelle, couleur.libelle
+        SELECT 
+                L.id_declinaison_velo AS id_declinaison_velo,
+                L.quantite            AS quantite,
+                V.nom_velo            AS nom,
+                D.prix_declinaison    AS prix,
+                D.stock               AS stock,
+                D.id_couleur          AS id_couleur,
+                D.id_taille           AS id_taille,
+                T.libelle             AS libelle_taille,
+                C.libelle             AS libelle_couleur
+            
+        FROM ligne_panier AS L
+            
+        JOIN declinaison_velo D ON L.id_declinaison_velo = D.id_declinaison_velo
+        JOIN velo V ON D.id_velo = V.id_velo
+        JOIN taille T ON D.id_taille = T.id_taille
+        JOIN couleur C ON D.id_couleur = C.id_couleur
+            
+        WHERE L.id_utilisateur = %s
+            
+        GROUP BY id_declinaison_velo, V.id_velo, V.nom_velo, L.quantite, D.prix_declinaison, D.stock, D.id_couleur, D.id_taille, T.libelle, C.libelle
     '''
     mycursor.execute(sql, id_client)
     velos_panier = mycursor.fetchall()

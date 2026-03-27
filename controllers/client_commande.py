@@ -131,19 +131,20 @@ def client_commande_show():
     mycursor = get_db().cursor()
     id_client = session['id_user']
     sql = '''
-          SELECT 
-              commande.id_commande, 
-              date_achat,
-              libelle, 
-              SUM(ligne_commande.quantite) AS nbr_velos,
-              SUM(ligne_commande.prix * ligne_commande.quantite) AS prix_total
+        SELECT 
+                commande.id_commande, 
+                commande.id_etat AS etat_id,
+                date_achat,
+                libelle, 
+                SUM(ligne_commande.quantite) AS nbr_velos,
+                SUM(ligne_commande.prix * ligne_commande.quantite) AS prix_total
         FROM commande
         INNER JOIN etat ON commande.id_etat = etat.id_etat
         INNER JOIN ligne_commande ON commande.id_commande = ligne_commande.id_commande
-        WHERE commande.utilisateur_id = %s
-      GROUP BY commande.id_commande, date_achat, libelle
+        WHERE commande.id_utilisateur = %s
+        GROUP BY commande.id_commande, date_achat, libelle, etat_id
         ORDER BY commande.date_achat DESC
-          '''
+    '''
     mycursor.execute(sql, id_client)
     commandes = mycursor.fetchall()
 
@@ -151,22 +152,60 @@ def client_commande_show():
     commande_adresses = None
     id_commande = request.args.get('id_commande', None)
     if id_commande != None:
-        print(id_commande)
         sql = '''
-              SELECT utilisateur.nom   AS nom,
-                     quantite          AS quantite,
-                     prix              AS prix,
-                     (quantite * prix) AS prix_ligne
-              FROM ligne_commande
-                       INNER JOIN commande ON ligne_commande.id_commande = commande.id_commande
-                       INNER JOIN utilisateur ON commande.utilisateur_id = utilisateur.id_utilisateur
-              WHERE ligne_commande.id_commande = %s  AND commande.utilisateur_id = %s
-              '''
+            SELECT V.nom_velo                         AS nom,
+                   L.quantite                         AS quantite,
+                   L.prix                             AS prix,
+                   (L.quantite * L.prix)              AS prix_ligne,
+                   D.id_taille                        AS id_taille,
+                   D.id_couleur                       AS id_couleur,
+                   couleur.libelle                    AS libelle_couleur,
+                   taille.libelle                     AS libelle_taille,
+                   COUNT(D_COUNT.id_declinaison_velo) AS nb_declinaisons
+                
+            FROM ligne_commande AS L
+                
+            JOIN commande C ON L.id_commande = C.id_commande
+            JOIN utilisateur U ON C.id_utilisateur = U.id_utilisateur
+            JOIN declinaison_velo D ON L.id_declinaison_velo = D.id_declinaison_velo
+            JOIN velo V ON D.id_velo = V.id_velo
+            JOIN couleur ON D.id_couleur = couleur.id_couleur
+            JOIN taille ON D.id_taille = taille.id_taille
+            RIGHT JOIN declinaison_velo D_COUNT ON V.id_velo = D_COUNT.id_velo
+                
+            WHERE L.id_commande = %s  AND C.id_utilisateur = %s
+            GROUP BY V.nom_velo, quantite, prix, quantite, prix, D.id_taille, D.id_couleur, couleur.libelle, taille.libelle 
+      '''
         mycursor.execute(sql, (id_commande, id_client))
         velos_commande = mycursor.fetchall()
 
+
+
         # partie 2 : selection de l'adresse de livraison et de facturation de la commande selectionnée
-        sql = ''' selection des adressses '''
+        sql = ''' 
+            SELECT A_LIVRAISON.nom             AS nom_livraison,
+                   A_LIVRAISON.rue             AS rue_livraison,
+                   A_LIVRAISON.code_postal     AS code_postal_livraison,
+                   A_LIVRAISON.ville           AS ville_livraison,
+                
+                   A_FACTURATION.nom           AS nom_facturation,
+                   A_FACTURATION.rue           AS rue_facturation,
+                   A_FACTURATION.code_postal   AS code_postal_facturation,
+                   A_FACTURATION.ville         AS ville_facturation,
+                
+                   IF(A_LIVRAISON.id_adresse = A_FACTURATION.id_adresse,
+                      'adresse_identique',
+                      'adresse_non_identique') AS adresse_identique
+                
+            FROM commande C 
+                
+            JOIN adresse A_LIVRAISON ON C.id_adresse = A_LIVRAISON.id_adresse
+            JOIN adresse A_FACTURATION ON C.id_adresse_1 = A_FACTURATION.id_adresse
+                
+            WHERE C.id_commande = %s
+         '''
+        mycursor.execute(sql, id_commande)
+        commande_adresses = mycursor.fetchone()
 
     return render_template('client/commandes/show.html'
                            , commandes=commandes

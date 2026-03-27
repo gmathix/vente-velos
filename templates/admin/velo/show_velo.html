@@ -31,7 +31,7 @@ velos (tableau de dictionnaires)
            <tr>
                   <td>{{ ligne.nom }}</td>
                   <td>{{ ligne.id_velo }}</td>
-                  <td><span style="color: red">{{ ligne.libelle_type_velo }}</span> ({{ ligne.type_velo_id }}) - <span style="color: red">{{ ligne.libelle_taille }}</span> ({{ ligne.taille_id }})</td>
+                  <td><span style="color: red">{{ ligne.libelle_type_velo }}</span> ({{ ligne.type_velo_id }})</td>
                   <td>{#{ ligne.prix }#}  {{  "{:,.2f} €".format(ligne.prix) }}</td>
                   <td>
                   {% if ligne.stock is defined %}
