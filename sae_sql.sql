@@ -65,6 +65,7 @@ CREATE TABLE velo(
    fournisseur VARCHAR(50),
    marque VARCHAR(50),
     image VARCHAR(50),
+    utilisable BOOLEAN DEFAULT TRUE,
    id_type_velo INT NOT NULL,
    PRIMARY KEY(id_velo),
    FOREIGN KEY(id_type_velo) REFERENCES type_velo(id_type_velo)
