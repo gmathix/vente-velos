@@ -46,9 +46,6 @@ types_velo : tableau de dictionnaires
                     <label for="description">Description :
                         <input name="description" type="text" value="{{ velo.description }}" class="form-control">
                     </label>
-                    <label for="stock">stock :
-                        <input name="stock" type="number" value={{ velo.stock }} step=1 min=0 class="form-control" >
-                    </label>
 
                     <button class="btn btn-primary mt-2">
                                 Modifier
@@ -68,6 +65,7 @@ types_velo : tableau de dictionnaires
                     </div>
                     <table class="table table-hover table-responsive">
 
+                        <th styele="width: 300px">utilisable</th>
                         <th style="width: 300px">taille</th>
                         <th style="width: 300px">couleur</th>
                         <th style="width: 300px">stock</th>
@@ -79,10 +77,18 @@ types_velo : tableau de dictionnaires
                                 <td></td>
                                 <td></td>
                                 <td></td>
+                                <td></td>
                             </tr>
                         {% else %}
                             {% for declinaison_velo in declinaisons_velo %}
                                 <tr>
+
+                                    {%  if declinaison_velo.utilisable %}
+                                       <td style="color: green">Oui</td>
+                                    {% else %}
+                                        <td style="color: red">Non</td>
+                                    {% endif %}
+
                                     <td>
                                         {{ declinaison_velo.libelle_taille }}
                                     </td>

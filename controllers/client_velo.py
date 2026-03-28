@@ -41,6 +41,7 @@ def client_velo_show():
         SELECT  V.nom_velo                                AS nom,
                 V.id_velo                                 AS id_velo,
                 V.image                                   AS image,
+                V.utilisable                              AS utilisable,
                 COALESCE(MIN(D.prix_declinaison), 0)      AS prix,
                 SUM(D.stock)                              AS stock,
                 COUNT(D.id_declinaison_velo)              AS nb_declinaison
@@ -48,6 +49,9 @@ def client_velo_show():
         FROM velo AS V
             
         LEFT JOIN declinaison_velo D ON V.id_velo = D.id_velo
+            
+        WHERE D.utilisable = TRUE AND V.utilisable = TRUE
+
     '''
     list_param = []
     list_conditions = []
@@ -73,7 +77,7 @@ def client_velo_show():
         sql += "\nWHERE "
         sql += ' AND '.join(list_conditions)
 
-    sql += "GROUP BY V.prix_velo, V.nom_velo, V.id_velo, V.image"
+    sql += "GROUP BY V.prix_velo, V.nom_velo, V.id_velo, V.image, V.utilisable"
 
     mycursor.execute(sql, list_param)
 
@@ -107,7 +111,7 @@ def client_velo_show():
         JOIN taille T ON D.id_taille = T.id_taille
         JOIN couleur C ON D.id_couleur = C.id_couleur
             
-        WHERE L.id_utilisateur = %s
+        WHERE L.id_utilisateur = %s 
             
         GROUP BY id_declinaison_velo, V.id_velo, V.nom_velo, L.quantite, D.prix_declinaison, D.stock, D.id_couleur, D.id_taille, T.libelle, C.libelle
     '''

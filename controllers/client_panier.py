@@ -34,7 +34,7 @@ def client_panier_add():
             INNER JOIN declinaison_velo d ON velo.id_velo = d.id_velo
             INNER JOIN couleur ON d.id_couleur = couleur.id_couleur
             INNER JOIN taille  ON d.id_taille = taille.id_taille
-            WHERE velo.id_velo = %s
+            WHERE velo.id_velo = %s AND d.utilisable = TRUE
         '''
         mycursor.execute(sql, id_velo)
         declinaisons = mycursor.fetchall()

@@ -21,7 +21,7 @@ velos (tableau de dictionnaires)
 <table class="table">
     <thead class="thead-dark">
         <tr>
-            <th>nom</th><th>id</th><th>type velo (id)</th><th>prix</th><th style="color: green">stock</th>
+            <th>nom</th><th>id</th><th>type velo (id)</th><td>utilisable</td><th>prix</th><th style="color: green">stock</th>
             <th>nouveaux avis</th><th>nb déclinaisons</th><th>image</th><th>opération</th>
         </tr>
     </thead>
@@ -29,9 +29,16 @@ velos (tableau de dictionnaires)
     {% if velos | length >= 1 %}
         {% for ligne in velos %}
            <tr>
+
                   <td>{{ ligne.nom }}</td>
                   <td>{{ ligne.id_velo }}</td>
+
                   <td><span style="color: red">{{ ligne.libelle_type_velo }}</span> ({{ ligne.type_velo_id }})</td>
+                    {%  if ligne.utilisable %}
+                           <td style="color: green">Oui</td>
+                        {% else %}
+                            <td style="color: red">Non</td>
+                    {% endif %}
                   <td>{#{ ligne.prix }#}  {{  "{:,.2f} €".format(ligne.prix) }}</td>
                   <td>
                   {% if ligne.stock is defined %}

@@ -18,7 +18,7 @@
                     <input type="hidden" value="{{ declinaison_velo.id_declinaison_velo }}" name="id_declinaison_velo">
                     <input type="hidden" value="{{ declinaison_velo.velo_id }}" name="id_velo">
                     <label for="stock">Stock :
-                        <input name="stock" type="number" min="0.0" step="0.01" value="{{ declinaison_velo.stock }}" class="form-control" >
+                        <input name="stock" type="number" min="0" step="1" value="{{ declinaison_velo.stock }}" class="form-control" >
                     </label>
                     {% if  d_taille_uniq is defined and  d_taille_uniq==1 %}
                         <div>!</div><div><strong>Une taille unique est définie </strong></div>

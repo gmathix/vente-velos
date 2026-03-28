@@ -21,7 +21,7 @@
 <br>
 
     <h2> nombre de velos :
-{#    <span style="color: red;">{{ cout_total.nbr_velos }}</span></h2>#}
+    <span style="color: red;">{{ cout_total.nbr_velos }}</span></h2>
 
 <table class="table">
     <thead class="thead-dark">
@@ -30,13 +30,13 @@
         </tr>
     </thead>
     <tbody>
-    {% if types_velos_nb | length >= 1 %}
-        {% for ligne in types_velos_nb %}
+    {% if datas_show | length >= 1 %}
+        {% for ligne in datas_show %}
            <tr>
                   <td>{{ ligne.libelle }}</td>
                   <td>{{ ligne.id_type_velo }}</td>
                    <td><span style="color: red">
-                       {% if ligne.nbr_velos_stock is not none %}  {{ ligne.nbr_velos }} {% else %}
+                       {% if ligne.nbr_velos is not none %}  {{ ligne.nbr_velos }} {% else %}
                        pas de velo {% endif %}
                    </span></td>
 
