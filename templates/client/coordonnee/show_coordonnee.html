@@ -18,46 +18,52 @@
             </tr>
         </table>
         <div>
-            <a href="/client/coordonnee/edit"  class="btn btn-primary m-2" >Modifier son profil</a>
+            <a href="/client/coordonnee/edit" class="btn btn-primary m-2">Modifier son profil</a>
         </div>
     </div>
     <br>
 
-    <div style="text-align: center"><h2 >Mes adresses :</h2></div>
+    <div style="text-align: center"><h2>Mes adresses :</h2></div>
     <div class="border m-auto p-3">
         <table class="table border">
             <thead class="thead-dark">
                 <tr>
-                    <th>nom</th>
+                    <th>Nom</th>
                     <th>Rue</th>
-                     <th>Code Postal</th>
-                     <th>Ville</th>
-                    <th>nbr. utilisation commande</th>
+                    <th>Code Postal</th>
+                    <th>Ville</th>
+                    <th>Nbr. commandes</th>
+                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
                 {% for adresse in adresses %}
-                    <tr
-                            {% if adresse.valide is defined and adresse.valide==0 %} style="color: darkorange"{% endif %}
-                            {% if adresse.favori is defined and adresse.favori==1 %} style="color: blue; font-weight: bolder;"{% endif %}
-                    >
+                    {% if adresse.valide == 0 %}
+                        <tr style="color: darkorange;">
+                    {% elif adresse.favori == 1 %}
+                        <tr style="color: blue; font-weight: bolder;">
+                    {% else %}
+                        <tr>
+                    {% endif %}
 
-                        <td>{{ adresse.nom }}
-                            {% if adresse.favori is defined and adresse.favori==1 %}💛{% endif %}
+                        <td>
+                            {{ adresse.nom }}
+                            {% if adresse.favori == 1 %}(favorite){% endif %}
+                            {% if adresse.valide == 0 %}(non valide){% endif %}
                         </td>
                         <td>{{ adresse.rue }}</td>
                         <td>{{ adresse.code_postal }}</td>
                         <td>{{ adresse.ville }}</td>
-                        <td> {% if adresse.nbr_commandes is defined %}{{ adresse.nbr_commandes }} {% endif %} </td>
+                        <td>{{ adresse.nbr_commandes }}</td>
                         <td>
-                            {% if adresse.valide is defined and adresse.valide==0 %}
-                                <span style="color: darkorange">*</span>
+                            {% if adresse.valide == 0 %}
+                                <span style="color: darkorange;">*</span>
                             {% else %}
-                                <a class="btn btn-primary" href="/client/coordonnee/edit_adresse?id_adresse={{ adresse.id_adresse }}"> Modifier </a>
-                            <form action="/client/coordonnee/delete_adresse" style="display: inline-block;"  method="post">
-                                <input type="hidden"  name="id_adresse" value="{{ adresse.id_adresse }}">
-                                <button class="btn btn-primary" > Supprimer </button>
-                            </form>
+                                <a class="btn btn-primary" href="/client/coordonnee/edit_adresse?id_adresse={{ adresse.id_adresse }}">Modifier</a>
+                                <form action="/client/coordonnee/delete_adresse" style="display: inline-block;" method="post">
+                                    <input type="hidden" name="id_adresse" value="{{ adresse.id_adresse }}">
+                                    <button class="btn btn-primary">Supprimer</button>
+                                </form>
                             {% endif %}
                         </td>
                     </tr>
@@ -65,21 +71,24 @@
             </tbody>
         </table>
         <div>
-            {% if nb_adresses is defined %}
-                {% if nb_adresses <4 %}
-                        <span style="color: darkorange">* adresse non valide</span><br><span style="color: blue; font-weight: bolder;">* favori 💛</span>
-                  <a href="/client/coordonnee/add_adresse" class="btn btn-primary m-2">Ajouter une adresse</a>
-                {% endif %}
-                 <span style="color:green;">( <strong>{{ nb_adresses }}</strong> / 4 adresses valides ; <strong>{{ nb_adresses_tot }}</strong> adresses pour l'utilisateur)</span>
-            {% else %}
+            <span style="color: darkorange;">* adresse non valide</span>
+            <br>
+            <span style="color: blue; font-weight: bolder;">* adresse favorite</span>
+            <br><br>
+            {% if nb_adresses < 4 %}
                 <a href="/client/coordonnee/add_adresse" class="btn btn-primary m-2">Ajouter une adresse</a>
+            {% else %}
+                <span style="color: darkorange;">Maximum de 4 adresses valides atteint.</span>
             {% endif %}
+            <span style="color: green;">
+                ( <strong>{{ nb_adresses }}</strong> / 4 adresses valides ;
+                <strong>{{ nb_adresses_tot }}</strong> adresses pour l'utilisateur )
+            </span>
         </div>
     </div>
-        <div>
-            <a href="/client/velo/show" class="btn btn-primary m-2">Retour aux velos </a>
-        </div>
+    <div>
+        <a href="/client/velo/show" class="btn btn-primary m-2">Retour aux vélos</a>
+    </div>
 
 </div>
-
 {% endblock %}

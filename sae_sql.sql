@@ -44,6 +44,8 @@ CREATE TABLE adresse(
    code_postal INT,
    ville VARCHAR(50),
    date_utilisation DATE,
+   addresse_valide boolean DEFAULT TRUE,
+   addresse_favorite boolean DEFAULT TRUe,
    id_utilisateur INT NOT NULL,
    PRIMARY KEY(id_adresse),
    FOREIGN KEY(id_utilisateur) REFERENCES utilisateur(id_utilisateur)

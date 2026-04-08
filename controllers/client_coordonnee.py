@@ -19,20 +19,25 @@ def client_coordonnee_show():
     utilisateur = mycursor.fetchone()
 
     sql = '''
-        SELECT adresse.nom,
-                rue,
-                code_postal,
-                ville,
-                COUNT(id_commande) AS nbr_commandes
+        SELECT adresse.id_adresse,nom,rue,code_postal,ville,adresse_favorite,addresse_valide COUNT(DISTINCT commande.id_commande) AS nbr_commandes
         FROM adresse
-        INNER JOIN utilisateur ON adresse.id_utilisateur = utilisateur.id_utilisateur
-        LEFT JOIN commande ON adresse.id_adresse = commande.id_adresse_livraison
+        LEFT JOIN commande ON adresse.id_adresse = commande.id_adresse_livraison-
+        OR adresse.id_adresse = commande.id_adresse_1 
         WHERE utilisateur.id_utilisateur = %s
-        GROUP BY adresse.nom, rue, code_postal, ville 
+        GROUP BY adresse.id_adresse,nom,rue,code_postal,ville,adresse_favorite,addresse_valide 
+        ORDER BY  addresse_favorite DESC
     '''
     mycursor.execute(sql, id_client)
     adresses = mycursor.fetchall()
     nb_adresses = len(adresses)
+
+    sql = '''
+          SELECT COUNT(*) AS nombre_adresses_valides
+          FROM adresse
+          WHERE id_utilisateur = %s AND valide = TRUE 
+          '''
+    mycursor.execute(sql, id_client)
+    nombre_adresses_valides=mycursor.fetchone()['nombres_adresses_valides']
 
     print(adresses)
 
@@ -40,6 +45,7 @@ def client_coordonnee_show():
                            , utilisateur=utilisateur
                            , adresses=adresses
                            , nb_adresses=nb_adresses
+                           , nombre_adresses_valides_adresses=nombre_adresses_valides
                            )
 
 @client_coordonnee.route('/client/coordonnee/edit', methods=['GET'])
