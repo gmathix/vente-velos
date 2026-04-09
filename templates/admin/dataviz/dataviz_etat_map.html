@@ -1,44 +1,70 @@
 {% extends 'admin/layout_admin.html' %}
 
-
-{% block javascripts %}
-{#    attention il faut importer la bibliotheque chart.js avant de définir l'objet chart#}
-    {{ super() }}
-   {# <script src="{{ url_for('static', filename='bootstrap/js/bootstrap.js') }}" ></script>#}
-{% endblock %}
-
-{% block javascripts_head %}
-{#    attention il faut importer la bibliotheque chart.js avant de définir l'objet chart#}
-{#    <script src="{{ url_for('static', filename='chart.js') }}" ></script>#}
-      <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js"></script>
-{% endblock %}
-
-{% block title %}
-    <title>test carte</title>
-{% endblock %}
+{% block title %}<title>Carte - Ventes par département</title>{% endblock %}
 
 {% block body %}
-    <a href="https://github.com/regisenguehard/carte-france-svg/blob/master/carte-france-svg.html" target="_blank">exemple github carte</a>
-    <br>
-    <a href="https://www.youtube.com/watch?v=UZs8l50gxjU" target="_blank"> video graficart</a>
-    <br>
-    <a href="https://www.amcharts.com/svg-maps/?map=franceDepartments"> github carte svg</a>
-    <br>
 
-    <div class="text-center border w-50 m-auto">
-        <h2 class="text-center">Données sur les adresses clients</h2>
-        {% include 'admin/dataviz/franceMap.html' %}
-    </div>
+<h2>
+    {% if choix == 'nb_ventes' %}
+        Carte : Nombre de ventes par département
+    {% else %}
+        Carte : Chiffre d'affaire par département
+    {% endif %}
+</h2>
 
-    <script>
-    {% for element in adresses %}
-        document.getElementById({{ element['dep'] }}).style.fill= "#000000";
-        document.getElementById({{ element['dep'] }}).setAttribute("fill-opacity", {{ element['indice'] }});
+<p>
+    <a href="/admin/dataviz/etat2?choix=nb_ventes"
+       class="btn {% if choix == 'nb_ventes' %}btn-primary{% else %}btn-outline-primary{% endif %}">
+        Nombre de commandes
+    </a>
+    <a href="/admin/dataviz/etat2?choix=chiffre_affaire"
+       class="btn {% if choix == 'chiffre_affaire' %}btn-primary{% else %}btn-outline-primary{% endif %}">
+        Chiffre d'affaire
+    </a>
+    <a href="/admin/dataviz/etat1" class="btn btn-secondary">Voir tableau et graphiques</a>
+</p>
+
+<div style="margin: 10px 0;">
+    <span style="background-color: rgba(30, 100, 200, 0.15); padding: 4px 12px; border: 1px solid #ccc;">Faible</span>
+    <span style="background-color: rgba(30, 100, 200, 0.50); padding: 4px 12px; border: 1px solid #ccc;">Moyen</span>
+    <span style="background-color: rgba(30, 100, 200, 1.00); padding: 4px 12px; border: 1px solid #ccc; color:white;">Fort</span>
+    &nbsp; = intensité proportionnelle à la valeur maximale
+</div>
+
+<table class="table table-sm table-bordered" style="width: 400px; margin-top: 10px;">
+    <thead class="thead-dark">
+        <tr>
+            <th>Dép.</th>
+            <th>Nb ventes</th>
+            <th>CA (€)</th>
+            <th>Intensité</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for row in adresses %}
+        <tr>
+            <td><strong>{{ row.dep }}</strong></td>
+            <td>{{ row.nb_ventes }}</td>
+            <td>{{ "%.2f"|format(row.chiffre_affaire) }}</td>
+            <td>
+                <div style="width: {{ (row.indice * 100)|int }}px; height: 14px;
+                            background-color: rgba(30,100,200,{{ row.indice }});
+                            border: 1px solid #aaa;"></div>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<style>
+    svg path { fill: #e8e8e8; stroke: #ffffff; stroke-width: 0.5;
+    {% for row in adresses %}
+    #{{ row.dep }} { fill: rgba(30, 100, 200, {{ row.indice }}); }}
     {% endfor %}
-    </script>
+</style>
 
-{#    /* couleur avec transparence */#}
-{#background-color : rgba(255,255,255,0.5);#}
-{#    https://web-color.aliasdmc.fr/couleur-web-white-avec-transparence.html#}
+<div class="text-center border w-50 m-auto">
+    {% include 'admin/dataviz/franceMap.html' %}
+</div>
 
 {% endblock %}
