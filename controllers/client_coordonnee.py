@@ -18,13 +18,20 @@ def client_coordonnee_show():
     utilisateur = mycursor.fetchone()
 
     sql = '''
-        SELECT adresse.id_adresse, adresse.nom, adresse.rue,adresse.code_postal, adresse.ville, adresse.valide, adresse.favorite
-        COUNT(DISTINCT commande.id_commande) AS nbr_commandes
+        SELECT adresse.id_adresse,
+               adresse.nom,
+               adresse.rue,
+               adresse.code_postal,
+               adresse.ville,
+               adresse.valide,
+               adresse.favori,
+               COUNT(DISTINCT commande.id_commande) AS nbr_commandes
         FROM adresse
         LEFT JOIN commande ON adresse.id_adresse = commande.id_adresse
-        OR adresse.id_adresse = commande.id_adresse_1
+                           OR adresse.id_adresse = commande.id_adresse_1
         WHERE adresse.id_utilisateur = %s
-        GROUP BY adresse.id_adresse, adresse.nom, adresse.rue,adresse.code_postal, adresse.ville, adresse.valide, adresse.favorite
+        GROUP BY adresse.id_adresse, adresse.nom, adresse.rue,
+                 adresse.code_postal, adresse.ville, adresse.valide, adresse.favori
         ORDER BY adresse.favori DESC, adresse.date_utilisation DESC
     '''
     mycursor.execute(sql, id_client)
@@ -44,13 +51,13 @@ def client_coordonnee_show():
         WHERE id_utilisateur = %s
     '''
     mycursor.execute(sql, id_client)
-    nb_adresses_total = mycursor.fetchone()['nb_total']
+    nb_adresses_tot = mycursor.fetchone()['nb_total']
 
     return render_template('client/coordonnee/show_coordonnee.html',
                            utilisateur=utilisateur,
                            adresses=adresses,
                            nb_adresses=nb_adresses,
-                           nb_adresses_total=nb_adresses_total)
+                           nb_adresses_tot=nb_adresses_tot)
 
 
 @client_coordonnee.route('/client/coordonnee/edit', methods=['GET'])
@@ -96,6 +103,10 @@ def client_coordonnee_edit_valide():
     '''
     mycursor.execute(sql, (login, nom, email, id_client))
     get_db().commit()
+
+    # Mise a jour de la session pour que la navbar reflète les nouvelles valeurs
+    session['login'] = login
+
     return redirect('/client/coordonnee/show')
 
 
@@ -125,33 +136,32 @@ def client_coordonnee_add_adresse_valide():
     mycursor.execute(sql, id_client)
     utilisateur = mycursor.fetchone()
 
-    #le code postal doit avoir 5 chiffres
+    # Verification code postal : 5 chiffres, cote serveur Python
     if len(code_postal) != 5 or code_postal.isdigit() == False:
         flash(u'Le code postal doit etre compose de 5 chiffres.', 'alert-warning')
         return render_template('client/coordonnee/add_adresse.html',
                                utilisateur=utilisateur,
                                nom=nom, rue=rue,
-                               code_postal=code_postal,
-                               ville=ville)
+                               code_postal=code_postal, ville=ville)
 
-    # 4 adresses valides au maximum
+    # Verification limite 4 adresses valides en SQL
     sql = '''
-        SELECT COUNT(*) AS nb_adresses_valides
+        SELECT COUNT(*) AS nb_valides
         FROM adresse
         WHERE id_utilisateur = %s AND valide = TRUE
     '''
     mycursor.execute(sql, id_client)
-    nb_adresses_valides = mycursor.fetchone()['nb_adresses_valides']
+    nb_valides = mycursor.fetchone()['nb_valides']
 
-    if nb_adresses_valides >= 4:
-        flash(u'Le maximum des adresses fonctionnelles est atteint, vous nous pouvez pas ajouter un autre!!', 'alert-warning')
+    if nb_valides >= 4:
+        flash(u'Maximum de 4 adresses valides atteint.', 'alert-warning')
         return redirect('/client/coordonnee/show')
 
     # favori = TRUE si c'est la 1ere adresse valide, FALSE sinon
     # IF() en SQL evite un calcul Python
     sql = '''
         INSERT INTO adresse (nom, rue, code_postal, ville, date_utilisation, valide, favori, id_utilisateur)
-        VALUES (%s, %s, %s, %s, NOW(), TRUE,)
+        VALUES (%s, %s, %s, %s, NOW(), TRUE,
                 IF((SELECT COUNT(*) FROM adresse a WHERE a.id_utilisateur = %s AND a.valide = TRUE) = 0,
                    TRUE, FALSE),
                 %s)

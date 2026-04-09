@@ -44,7 +44,16 @@ def fct_fixtures_load():
         'ROLE_client','client',1),
     (3,'client2','client2@client2.fr',
         'pbkdf2:sha256:1000000$qDAkJlUehmaARP1S$39044e949f63765b785007523adcde3d2ad9c2283d71e3ce5ffe58cbf8d86080',
-        'ROLE_client','client2',1);
+        'ROLE_client','client2',1),
+    (4,'client3','client3@client3.fr',
+        'pbkdf2:sha256:1000000$jTcSUnFLWqDqGBJz$bf570532ed29dc8e3836245f37553be6bfea24d19dfb13145d33ab667c09b349',
+        'ROLE_client','client3',1),
+    (5,'client4','client4@client4.fr',
+        'pbkdf2:sha256:1000000$jTcSUnFLWqDqGBJz$bf570532ed29dc8e3836245f37553be6bfea24d19dfb13145d33ab667c09b349',
+        'ROLE_client','client4',1),
+    (6,'client5','client5@client5.fr',
+        'pbkdf2:sha256:1000000$jTcSUnFLWqDqGBJz$bf570532ed29dc8e3836245f37553be6bfea24d19dfb13145d33ab667c09b349',
+        'ROLE_client','client5',1);
     '''
     mycursor.execute(sql)
 
@@ -120,8 +129,16 @@ def fct_fixtures_load():
     mycursor.execute(sql)
     sql = '''
     INSERT INTO adresse (nom, rue, code_postal, ville, date_utilisation, valide, favori, id_utilisateur) VALUES
-    ('Belfort', 'rue des raverottes',  80000, 'belfort', '2025-12-12', TRUE, TRUE,  2),
-    ('Belfort', 'rue des belfortains', 80000, 'belfort', '2025-02-12', TRUE, FALSE, 2);
+    ('Dupont Jean',   'rue des raverottes',    90000, 'Belfort',        '2025-01-10', TRUE, TRUE,  2),
+    ('Dupont Jean',   'rue des belfortains',   90200, 'Giromagny',      '2025-02-12', TRUE, FALSE, 2),
+    ('Martin Sophie', '12 avenue de la gare',  75001, 'Paris',          '2025-01-15', TRUE, TRUE,  3),
+    ('Martin Sophie', '5 rue du commerce',     69001, 'Lyon',           '2025-02-01', TRUE, FALSE, 3),
+    ('Bernard Paul',  '8 boulevard Clemenceau',13001, 'Marseille',      '2025-01-20', TRUE, TRUE,  4),
+    ('Bernard Paul',  '3 rue Paradis',         13008, 'Marseille',      '2025-02-10', TRUE, FALSE, 4),
+    ('Durand Marie',  '20 rue nationale',      59000, 'Lille',          '2025-01-25', TRUE, TRUE,  5),
+    ('Durand Marie',  '7 place du general',    67000, 'Strasbourg',     '2025-03-01', TRUE, FALSE, 5),
+    ('Petit Lucas',   '15 rue saint nicolas',  44000, 'Nantes',         '2025-02-05', TRUE, TRUE,  6),
+    ('Petit Lucas',   '2 rue de la paix',      33000, 'Bordeaux',       '2025-03-10', TRUE, FALSE, 6);
     '''
     mycursor.execute(sql)
 
@@ -228,13 +245,18 @@ def fct_fixtures_load():
     mycursor.execute(sql)
     sql = '''
     INSERT INTO commande (date_achat, utilisateur_id, id_etat, id_adresse, id_adresse_1) VALUES
-    ('2024-12-10', 2, 3, 1, 1),
-    ('2025-01-05', 2, 2, 1, 1),
-    ('2025-01-22', 2, 4, 1, 1),
-    ('2025-01-28', 2, 1, 1, 1),
-    ('2024-11-15', 3, 3, 2, 2),
-    ('2025-01-08', 3, 2, 2, 2),
-    ('2025-01-25', 3, 1, 2, 2);
+    ('2025-01-05', 2, 3, 1, 1),
+    ('2025-02-10', 2, 2, 1, 1),
+    ('2025-03-01', 2, 4, 1, 1),
+    ('2025-01-15', 3, 3, 3, 3),
+    ('2025-02-20', 3, 2, 4, 4),
+    ('2025-01-20', 4, 3, 5, 5),
+    ('2025-02-15', 4, 2, 5, 5),
+    ('2025-03-05', 4, 4, 6, 6),
+    ('2025-01-25', 5, 3, 7, 7),
+    ('2025-02-28', 5, 2, 8, 8),
+    ('2025-02-05', 6, 3, 9, 9),
+    ('2025-03-10', 6, 2, 9, 9);
     '''
     mycursor.execute(sql)
 
@@ -255,18 +277,22 @@ def fct_fixtures_load():
     mycursor.execute(sql)
     sql = '''
     INSERT INTO ligne_commande (id_commande, id_declinaison_velo, prix, quantite) VALUES
-    (1,  2,   500.00, 1),
-    (1,  9,   450.00, 1),
-    (2, 10,   750.00, 1),
-    (2, 15,  1000.00, 1),
-    (3, 17,   300.00, 1),
-    (4,  1,   100.00, 20),
-    (4, 13,   200.00, 1),
-    (5,  4,   450.00, 1),
-    (5, 14,   300.00, 1),
-    (6, 17,   400.00, 1),
-    (7, 16,   400.00, 1),
-    (7,  8,   350.00, 1);
+    ( 1,  2,  500.00, 1),
+    ( 1,  9,  450.00, 1),
+    ( 2, 10,  750.00, 1),
+    ( 3, 17,  300.00, 2),
+    ( 4,  3,  300.00, 1),
+    ( 5,  7,  350.00, 1),
+    ( 5, 16,  400.00, 1),
+    ( 6,  9,  450.00, 2),
+    ( 7, 15, 1000.00, 1),
+    ( 8,  1,  100.00, 3),
+    ( 9, 11,  600.00, 1),
+    (10, 12,  800.00, 1),
+    (10, 13,  200.00, 2),
+    (11,  6,  350.00, 1),
+    (11, 17,  300.00, 1),
+    (12, 18,  250.00, 2);
     '''
     mycursor.execute(sql)
 

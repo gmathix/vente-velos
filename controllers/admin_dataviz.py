@@ -1,76 +1,102 @@
-
 # -*- coding:utf-8 -*-
 from flask import Blueprint
-from flask import Flask, request, render_template, redirect, abort, flash, session
+from flask import request, render_template, session
 
 from connexion_db import get_db
 
 admin_dataviz = Blueprint('admin_dataviz', __name__,
                         template_folder='templates')
 
+
 @admin_dataviz.route('/admin/dataviz/etat1')
-def show_type_velo_stock():
+def show_dataviz_tableau():
     mycursor = get_db().cursor()
-    sql = '''
-        SELECT TV.libelle_type_velo AS libelle,
-               TV.id_type_velo      AS id_type_velo,
-               COUNT(V.id_velo)     AS nbr_velos
-               
-        FROM type_velo AS TV
-            
-        INNER JOIN velo V ON TV.id_type_velo = V.id_type_velo
-            
-        GROUP BY TV.libelle_type_velo, TV.id_type_velo
-   '''
-    mycursor.execute(sql)
-    datas_show = mycursor.fetchall()
-    labels = [str(row['libelle']) for row in datas_show]
-    values = [int(row['nbr_velos']) for row in datas_show]
 
-
+    # Nombre de ventes et chiffre d'affaire par departement
+    # Les 2 premiers chiffres du code postal = numero de departement
+    # LEFT() en SQL pour extraire les 2 chiffres de gauche
+    # SUM et COUNT en SQL, aucun calcul Python
     sql = '''
-        SELECT COUNT(*) AS nbr_velos
-        FROM velo
+        SELECT LEFT(adresse.code_postal, 2)          AS departement,
+               COUNT(DISTINCT commande.id_commande)  AS nb_ventes,
+               SUM(ligne_commande.prix * ligne_commande.quantite) AS chiffre_affaire
+        FROM commande
+        JOIN adresse       ON commande.id_adresse = adresse.id_adresse
+        JOIN ligne_commande ON commande.id_commande = ligne_commande.id_commande
+        GROUP BY LEFT(adresse.code_postal, 2)
+        ORDER BY chiffre_affaire DESC
     '''
     mycursor.execute(sql)
-    cout_total = mycursor.fetchone()
+    datas_show = mycursor.fetchall()
 
+    # Labels et valeurs pour les graphiques chart.js
+    # Listes construites en Python a partir du fetchall, pas de calcul
+    labels_dep    = [str(row['departement'])    for row in datas_show]
+    values_ventes = [int(row['nb_ventes'])      for row in datas_show]
+    values_ca     = [float(row['chiffre_affaire']) for row in datas_show]
 
-    return render_template('admin/dataviz/dataviz_etat_1.html'
-                           , cout_total=cout_total
-                           , datas_show=datas_show
-                           , labels=labels
-                           , values=values)
-
-
-# sujet 3 : adresses
+    return render_template('admin/dataviz/dataviz_etat_1.html',
+                           datas_show=datas_show,
+                           labels_dep=labels_dep,
+                           values_ventes=values_ventes,
+                           values_ca=values_ca)
 
 
 @admin_dataviz.route('/admin/dataviz/etat2')
 def show_dataviz_map():
-    # mycursor = get_db().cursor()
-    # sql = '''    '''
-    # mycursor.execute(sql)
-    # adresses = mycursor.fetchall()
+    mycursor = get_db().cursor()
 
-    #exemples de tableau "résultat" de la requête
-    adresses =  [{'dep': '25', 'nombre': 1}, {'dep': '83', 'nombre': 1}, {'dep': '90', 'nombre': 3}]
+    # choix : 'nb_ventes' ou 'chiffre_affaire', transmis par lien GET
+    choix = request.args.get('choix', 'nb_ventes')
 
-    # recherche de la valeur maxi "nombre" dans les départements
-    # maxAddress = 0
-    # for element in adresses:
-    #     if element['nbr_dept'] > maxAddress:
-    #         maxAddress = element['nbr_dept']
-    # calcul d'un coefficient de 0 à 1 pour chaque département
-    # if maxAddress != 0:
-    #     for element in adresses:
-    #         indice = element['nbr_dept'] / maxAddress
-    #         element['indice'] = round(indice,2)
+    sql = '''
+        SELECT LEFT(adresse.code_postal, 2)          AS dep,
+               COUNT(DISTINCT commande.id_commande)  AS nb_ventes,
+               SUM(ligne_commande.prix * ligne_commande.quantite) AS chiffre_affaire
+        FROM commande
+        JOIN adresse        ON commande.id_adresse = adresse.id_adresse
+        JOIN ligne_commande ON commande.id_commande = ligne_commande.id_commande
+        GROUP BY LEFT(adresse.code_postal, 2)
+        ORDER BY dep ASC
+    '''
+    mycursor.execute(sql)
+    datas = mycursor.fetchall()
 
-    print(adresses)
+    # Valeur maximale pour calculer l'indice (intensite couleur) en SQL
+    sql_max = '''
+        SELECT MAX(sous.valeur) AS valeur_max
+        FROM (
+            SELECT IF(%s = 'nb_ventes',
+                      COUNT(DISTINCT commande.id_commande),
+                      SUM(ligne_commande.prix * ligne_commande.quantite)
+                   ) AS valeur
+            FROM commande
+            JOIN adresse        ON commande.id_adresse = adresse.id_adresse
+            JOIN ligne_commande ON commande.id_commande = ligne_commande.id_commande
+            GROUP BY LEFT(adresse.code_postal, 2)
+        ) AS sous
+    '''
+    mycursor.execute(sql_max, choix)
+    valeur_max = mycursor.fetchone()['valeur_max']
 
-    return render_template('admin/dataviz/dataviz_etat_map.html'
-                           , adresses=adresses
-                          )
+    # Construction du dictionnaire dep -> indice (0.0 a 1.0) pour colorier la carte
+    # L'indice est calcule en SQL via ROUND et division
+    sql_indice = '''
+        SELECT LEFT(adresse.code_postal, 2) AS dep,
+               IF(%s = 'nb_ventes',
+                  ROUND(COUNT(DISTINCT commande.id_commande) / %s, 2),
+                  ROUND(SUM(ligne_commande.prix * ligne_commande.quantite) / %s, 2)
+               ) AS indice,
+               COUNT(DISTINCT commande.id_commande)  AS nb_ventes,
+               SUM(ligne_commande.prix * ligne_commande.quantite) AS chiffre_affaire
+        FROM commande
+        JOIN adresse        ON commande.id_adresse = adresse.id_adresse
+        JOIN ligne_commande ON commande.id_commande = ligne_commande.id_commande
+        GROUP BY LEFT(adresse.code_postal, 2)
+    '''
+    mycursor.execute(sql_indice, (choix, valeur_max, valeur_max))
+    adresses = mycursor.fetchall()
 
-
+    return render_template('admin/dataviz/dataviz_etat_map.html',
+                           adresses=adresses,
+                           choix=choix)
