@@ -9,37 +9,58 @@ admin_dataviz = Blueprint('admin_dataviz', __name__,
 
 
 @admin_dataviz.route('/admin/dataviz/etat1')
-def show_dataviz_tableau():
+def show_type_velo_stock():
     mycursor = get_db().cursor()
-
-    # Nombre de ventes et chiffre d'affaire par departement
-    # Les 2 premiers chiffres du code postal = numero de departement
-    # LEFT() en SQL pour extraire les 2 chiffres de gauche
-    # SUM et COUNT en SQL, aucun calcul Python
     sql = '''
-        SELECT LEFT(adresse.code_postal, 2)          AS departement,
-               COUNT(DISTINCT commande.id_commande)  AS nb_ventes,
-               SUM(ligne_commande.prix * ligne_commande.quantite) AS chiffre_affaire
-        FROM commande
-        JOIN adresse       ON commande.id_adresse = adresse.id_adresse
-        JOIN ligne_commande ON commande.id_commande = ligne_commande.id_commande
-        GROUP BY LEFT(adresse.code_postal, 2)
-        ORDER BY chiffre_affaire DESC
-    '''
+          SELECT TV.libelle_type_velo AS libelle,
+                 TV.id_type_velo      AS id_type_velo,
+                 COUNT(V.id_velo)     AS nbr_velos
+
+          FROM type_velo AS TV
+
+                   INNER JOIN velo V ON TV.id_type_velo = V.id_type_velo
+
+          GROUP BY TV.libelle_type_velo, TV.id_type_velo \
+          '''
     mycursor.execute(sql)
     datas_show = mycursor.fetchall()
+    labels = [str(row['libelle']) for row in datas_show]
+    values = [int(row['nbr_velos']) for row in datas_show]
 
-    # Labels et valeurs pour les graphiques chart.js
-    # Listes construites en Python a partir du fetchall, pas de calcul
-    labels_dep    = [str(row['departement'])    for row in datas_show]
-    values_ventes = [int(row['nb_ventes'])      for row in datas_show]
-    values_ca     = [float(row['chiffre_affaire']) for row in datas_show]
+    sql = '''
+          SELECT COUNT(*) AS nbr_velos
+          FROM velo \
+          '''
+    mycursor.execute(sql)
+    cout_total = mycursor.fetchone()
 
-    return render_template('admin/dataviz/dataviz_etat_1.html',
-                           datas_show=datas_show,
-                           labels_dep=labels_dep,
-                           values_ventes=values_ventes,
-                           values_ca=values_ca)
+
+    # stock total par couleur
+    sql = '''
+          SELECT C.libelle                          AS libelle_couleur,
+                 CONCAT('#', LPAD(HEX(C.code_couleur), 6, '0')) AS hex_couleur,
+                 COUNT(DV.id_declinaison_velo)      AS nbr_declinaisons,
+                 SUM(DV.stock)                      AS stock_total
+          FROM couleur C
+          INNER JOIN declinaison_velo DV ON C.id_couleur = DV.id_couleur
+          GROUP BY C.id_couleur, C.libelle, C.code_couleur
+          ORDER BY stock_total DESC
+          '''
+    mycursor.execute(sql)
+    datas_couleur = mycursor.fetchall()
+    labels_couleur = [str(row['libelle_couleur']) for row in datas_couleur]
+    values_couleur = [int(row['stock_total']) for row in datas_couleur]
+    hex_couleurs = [str(row['hex_couleur']) for row in datas_couleur]
+
+
+    return render_template('admin/dataviz/dataviz_etat_1.html'
+                           , cout_total=cout_total
+                           , datas_show=datas_show
+                           , labels=labels
+                           , values=values
+                           , labels_couleur=labels_couleur
+                           , values_couleur=values_couleur
+                           , hex_couleurs=hex_couleurs)
 
 
 @admin_dataviz.route('/admin/dataviz/etat2')

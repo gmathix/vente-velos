@@ -70,11 +70,12 @@ def client_panier_add():
 
 
     if not (article_panier is None) and article_panier['quantite'] >= 1:
-        sql = '''
-        UPDATE ligne_panier SET quantite = quantite + %s
-            WHERE id_utilisateur = %s AND id_declinaison_velo = %s
-        '''
-        mycursor.execute(sql, (quantite, id_client, id_declinaison_velo))
+        if declinaison_velo['stock'] >= int(quantite):
+            sql = '''
+            UPDATE ligne_panier SET quantite = quantite + %s
+                WHERE id_utilisateur = %s AND id_declinaison_velo = %s
+            '''
+            mycursor.execute(sql, (quantite, id_client, id_declinaison_velo))
     else:
         if int(quantite) >= 1:
             sql = '''

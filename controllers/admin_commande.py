@@ -25,13 +25,14 @@ def admin_commande_show():
                  date_achat                                         AS date_achat,
                  SUM(quantite)                                      AS nbr_velos,
                  SUM(ligne_commande.prix * ligne_commande.quantite) AS prix_total,
-                 libelle                                            AS libelle
+                 libelle                                            AS libelle,
+              commande.id_etat AS etat_id
           FROM commande
                    INNER JOIN utilisateur ON commande.id_utilisateur = utilisateur.id_utilisateur
                    INNER JOIN etat ON commande.id_etat = etat.id_etat
                    RIGHT JOIN ligne_commande ON commande.id_commande = ligne_commande.id_commande
-          GROUP BY login, date_achat, libelle, commande.id_commande 
-            ORDER BY etat.libelle ASC, commande.date_achat ASC
+          GROUP BY login, date_achat, libelle, commande.id_commande , etat_id
+            ORDER BY etat.libelle ASC, commande.date_achat DESC
           '''
     mycursor.execute(sql)
     commandes = mycursor.fetchall()
