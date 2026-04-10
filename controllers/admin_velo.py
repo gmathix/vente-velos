@@ -175,7 +175,7 @@ def delete_velo_cascade():
           SELECT COUNT(D.id_declinaison_velo) AS nb_declinaison
           FROM velo 
           INNER JOIN declinaison_velo D ON velo.id_velo = D.id_velo
-         WHERE id_velo = %s
+         WHERE velo.id_velo = %s
      '''
     mycursor.execute(sql, id_velo)
     nb_declinaison = mycursor.fetchone()

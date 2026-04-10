@@ -77,13 +77,14 @@ def cascade_delete_type_velo():
                  id_velo      AS id_velo,
                  id_type_velo AS type_velo_id,
                  prix_velo    AS prix,
-                 stock        AS stock,
-                 photo        AS image
+                image AS image
           FROM velo 
           WHERE id_type_velo = %s
           '''
     mycursor.execute(sql, id_type_velo)
     velos = mycursor.fetchall()
+
+    print(velos)
 
     return render_template('/admin/type_velo/cascade_delete_type_velo.html',
                            velos=velos,

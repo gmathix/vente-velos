@@ -42,6 +42,7 @@ def client_velo_show():
                 V.id_velo                                 AS id_velo,
                 V.image                                   AS image,
                 V.utilisable                              AS utilisable,
+                V.id_type_velo                            AS id_type_velo,
                 COALESCE(MIN(D.prix_declinaison), 0)      AS prix,
                 SUM(D.stock)                              AS stock,
                 COUNT(D.id_declinaison_velo)              AS nb_declinaison
@@ -62,7 +63,7 @@ def client_velo_show():
 
     if filtre_types:
         placeholders = ', '.join(['%s'] * len(filtre_types))
-        list_conditions.append(f'(velo.id_type_velo IN ({placeholders}))')
+        list_conditions.append(f'(id_type_velo IN ({placeholders}))')
         list_param.extend(filtre_types)
 
     if filtre_prix_min:
@@ -74,12 +75,17 @@ def client_velo_show():
         list_param.append(filtre_prix_max)
 
     if len(list_conditions) > 0:
-        sql += "\nWHERE "
+        sql += "\nAND  "
         sql += ' AND '.join(list_conditions)
 
-    sql += "GROUP BY V.prix_velo, V.nom_velo, V.id_velo, V.image, V.utilisable"
+    sql += '''
+    GROUP BY V.prix_velo, V.nom_velo, V.id_velo, V.image, V.utilisable, V.id_type_velo'''
+
+    print(sql)
 
     mycursor.execute(sql, list_param)
+
+
 
 
     velos = mycursor.fetchall()

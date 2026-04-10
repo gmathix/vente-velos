@@ -27,10 +27,11 @@ def admin_commande_show():
                  SUM(ligne_commande.prix * ligne_commande.quantite) AS prix_total,
                  libelle                                            AS libelle
           FROM commande
-                   INNER JOIN utilisateur ON commande.utilisateur_id = utilisateur.id_utilisateur
+                   INNER JOIN utilisateur ON commande.id_utilisateur = utilisateur.id_utilisateur
                    INNER JOIN etat ON commande.id_etat = etat.id_etat
                    RIGHT JOIN ligne_commande ON commande.id_commande = ligne_commande.id_commande
-          GROUP BY login, date_achat, libelle, commande.id_commande \
+          GROUP BY login, date_achat, libelle, commande.id_commande 
+            ORDER BY etat.libelle ASC, commande.date_achat ASC
           '''
     mycursor.execute(sql)
     commandes = mycursor.fetchall()
@@ -41,15 +42,28 @@ def admin_commande_show():
 
     if id_commande != None:
         sql = '''
-              SELECT utilisateur.nom   AS nom,
-                     quantite          AS quantite,
-                     prix              AS prix,
-                     (quantite * prix) AS prix_ligne
-
-              FROM ligne_commande
-                       INNER JOIN commande ON ligne_commande.id_commande = commande.id_commande
-                       INNER JOIN utilisateur ON commande.utilisateur_id = utilisateur.id_utilisateur
-              WHERE ligne_commande.id_commande = %s \
+            SELECT V.nom_velo                         AS nom,
+                   L.quantite                         AS quantite,
+                   L.prix                             AS prix,
+                   (L.quantite * L.prix)              AS prix_ligne,
+                   D.id_taille                        AS id_taille,
+                   D.id_couleur                       AS id_couleur,
+                   couleur.libelle                    AS libelle_couleur,
+                   taille.libelle                     AS libelle_taille,
+                   COUNT(D_COUNT.id_declinaison_velo) AS nb_declinaisons
+                
+            FROM ligne_commande AS L
+                
+            JOIN commande C ON L.id_commande = C.id_commande
+            JOIN utilisateur U ON C.id_utilisateur = U.id_utilisateur
+            JOIN declinaison_velo D ON L.id_declinaison_velo = D.id_declinaison_velo
+            JOIN velo V ON D.id_velo = V.id_velo
+            JOIN couleur ON D.id_couleur = couleur.id_couleur
+            JOIN taille ON D.id_taille = taille.id_taille
+            RIGHT JOIN declinaison_velo D_COUNT ON V.id_velo = D_COUNT.id_velo
+                
+            WHERE L.id_commande = %s
+            GROUP BY V.nom_velo, quantite, prix, quantite, prix, D.id_taille, D.id_couleur, couleur.libelle, taille.libelle 
               '''
         mycursor.execute(sql, id_commande)
         velos_commande = mycursor.fetchall()
@@ -91,7 +105,7 @@ def admin_commande_valider():
         print(commande_id)
         sql = '''
               UPDATE commande \
-              SET id_etat = (SELECT etat.id_etat from etat WHERE libelle = 'validé')
+              SET id_etat = (SELECT etat.id_etat from etat WHERE libelle = 'expédié')
               WHERE id_commande = %s \
               '''
         mycursor.execute(sql, commande_id)

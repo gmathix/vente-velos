@@ -21,7 +21,7 @@ def client_commande_valide():
                L.quantite AS quantite,
                D.prix_declinaison AS prix,
                D.stock AS stock,
-               T.libelle_taille AS libelle_taille
+               T.libelle AS libelle_taille
         FROM ligne_panier L
         JOIN declinaison_velo D ON L.id_declinaison_velo = D.id_declinaison_velo
         JOIN velo V ON D.id_velo = V.id_velo
@@ -102,7 +102,7 @@ def client_commande_add():
 
     # Creation de la commande
     sql = '''
-        INSERT INTO commande (date_achat, utilisateur_id, id_etat, id_adresse, id_adresse_1)
+        INSERT INTO commande (date_achat, id_utilisateur, id_etat, id_adresse, id_adresse_1)
         VALUES (%s, %s, %s, %s, %s)
     '''
     mycursor.execute(sql, (datetime.now(), id_client, id_etat,
@@ -154,7 +154,7 @@ def client_commande_show():
         FROM commande
         JOIN etat          ON commande.id_etat = etat.id_etat
         JOIN ligne_commande ON commande.id_commande = ligne_commande.id_commande
-        WHERE commande.utilisateur_id = %s
+        WHERE commande.id_utilisateur = %s
         GROUP BY commande.id_commande, commande.date_achat, etat.libelle
         ORDER BY commande.date_achat DESC
     '''
@@ -168,15 +168,28 @@ def client_commande_show():
     if id_commande != None:
         # Detail des articles de la commande selectionnee
         sql = '''
-            SELECT V.nom_velo                             AS nom,
-                   LC.quantite                            AS quantite,
-                   LC.prix                               AS prix,
-                   (LC.quantite * LC.prix)               AS prix_ligne
-            FROM ligne_commande LC
-            JOIN commande        C  ON LC.id_commande = C.id_commande
-            JOIN declinaison_velo D  ON LC.id_declinaison_velo = D.id_declinaison_velo
-            JOIN velo            V  ON D.id_velo = V.id_velo
-            WHERE LC.id_commande = %s AND C.utilisateur_id = %s
+            SELECT V.nom_velo                         AS nom,
+                   L.quantite                         AS quantite,
+                   L.prix                             AS prix,
+                   (L.quantite * L.prix)              AS prix_ligne,
+                   D.id_taille                        AS id_taille,
+                   D.id_couleur                       AS id_couleur,
+                   couleur.libelle                    AS libelle_couleur,
+                   taille.libelle                     AS libelle_taille,
+                   COUNT(D_COUNT.id_declinaison_velo) AS nb_declinaisons
+                
+            FROM ligne_commande AS L
+                
+            JOIN commande C ON L.id_commande = C.id_commande
+            JOIN utilisateur U ON C.id_utilisateur = U.id_utilisateur
+            JOIN declinaison_velo D ON L.id_declinaison_velo = D.id_declinaison_velo
+            JOIN velo V ON D.id_velo = V.id_velo
+            JOIN couleur ON D.id_couleur = couleur.id_couleur
+            JOIN taille ON D.id_taille = taille.id_taille
+            RIGHT JOIN declinaison_velo D_COUNT ON V.id_velo = D_COUNT.id_velo
+                
+            WHERE L.id_commande = %s  AND C.id_utilisateur = %s
+            GROUP BY V.nom_velo, quantite, prix, quantite, prix, D.id_taille, D.id_couleur, couleur.libelle, taille.libelle
         '''
         mycursor.execute(sql, (id_commande, id_client))
         velos_commande = mycursor.fetchall()
@@ -198,7 +211,7 @@ def client_commande_show():
             FROM commande C
             JOIN adresse A_LIV  ON C.id_adresse   = A_LIV.id_adresse
             JOIN adresse A_FACT ON C.id_adresse_1 = A_FACT.id_adresse
-            WHERE C.id_commande = %s AND C.utilisateur_id = %s
+            WHERE C.id_commande = %s AND C.id_utilisateur = %s
         '''
         mycursor.execute(sql, (id_commande, id_client))
         commande_adresses = mycursor.fetchone()
